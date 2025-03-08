@@ -6,10 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "websocket-server": "npx @hocuspocus/cli --port 1234 --sqlite --development-token development-token"
+    "lint": "next lint"
+
   },
-  "dependencies": {
+   "dependencies": {
     "@ai-sdk/google": "^1.1.20",
     "@ai-sdk/react": "^1.1.21",
     "@clerk/nextjs": "^4.29.9",

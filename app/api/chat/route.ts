@@ -7,7 +7,6 @@ const genAI = google("gemini-2.0-pro-exp-02-05")
 // IMPORTANT! Set the runtime to edge
 export const runtime = "edge"
 
-
 export async function POST(req: Request) {
   // Extract the `messages` from the body of the request
   const { messages, documentContext, activeDocument } = await req.json()

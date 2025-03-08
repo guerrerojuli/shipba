@@ -8,7 +8,7 @@ import Collaboration from "@tiptap/extension-collaboration"
 import CollaborationCursor from "@tiptap/extension-collaboration-cursor"
 import Link from "@tiptap/extension-link"
 import { HocuspocusProvider } from '@hocuspocus/provider'
-import type { Document } from "@/types/document"
+import type { Document as AppDocument } from "@/types/document"
 import { EditorToolbar } from "./editor-toolbar"
 import { TransformerTool } from "./transformer-tool"
 import { useUser } from "@clerk/nextjs"
@@ -22,7 +22,7 @@ import Code from '@tiptap/extension-code'
 
 
 interface EditorProps {
-  document: Document
+  document: AppDocument
   onAddToChat: (text: string) => void
 }
 
@@ -181,6 +181,7 @@ export function Editor({ document: documentData, onAddToChat }: EditorProps) {
             onClose={() => {
               setShowTransformer(false)
             }}
+            activeDocument={documentData}
           />
         )}
       </div>

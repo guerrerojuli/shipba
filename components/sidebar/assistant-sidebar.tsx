@@ -3,6 +3,7 @@
 import { KeyboardEvent, useRef } from "react"
 import { X, Plus, CornerDownLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import type { Document } from "@/types/document"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { useChat } from "@ai-sdk/react"

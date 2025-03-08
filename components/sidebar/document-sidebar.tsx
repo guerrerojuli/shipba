@@ -4,29 +4,29 @@ import { useState } from "react"
 import { Plus, File, Upload } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import type { Document } from "@/types/document"
+import type { Document as AppDocument } from "@/types/document"
 import { useUser } from "@clerk/nextjs"
 import { Sidebar, SidebarContent, SidebarHeader, SidebarProvider } from "@/components/ui/sidebar"
 
 interface DocumentSidebarProps {
-  activeDocument: Document | null
-  onDocumentSelect: (document: Document) => void
+  activeDocument: AppDocument | null
+  onDocumentSelect: (document: AppDocument) => void
 }
 
 export function DocumentSidebar({ activeDocument, onDocumentSelect }: DocumentSidebarProps) {
-  const [documents, setDocuments] = useState<Document[]>([
+  const [documents, setDocuments] = useState<AppDocument[]>([
     { id: "1", title: "Getting Started", content: "Welcome to the AI-powered document editor!" },
   ])
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
 
   const handleCreateDocument = () => {
-    const newDocument: Document = {
+    const newDocument: AppDocument = {
       id: Date.now().toString(),
       title: "Untitled Document",
       content: "",
     }
     setDocuments([...documents, newDocument])
-    onDocumentSelect(newDocument)
+    onDocumentSelect({...newDocument})
   }
 
   const handleUploadDocument = (file: File) => {
@@ -34,13 +34,13 @@ export function DocumentSidebar({ activeDocument, onDocumentSelect }: DocumentSi
     const reader = new FileReader()
     reader.onload = (e) => {
       const content = e.target?.result as string
-      const newDocument: Document = {
+      const newDocument: AppDocument = {
         id: Date.now().toString(),
         title: file.name,
         content: content || "Failed to load content",
       }
       setDocuments([...documents, newDocument])
-      onDocumentSelect(newDocument)
+      onDocumentSelect({...newDocument})
     }
     reader.readAsText(file)
     setIsUploadModalOpen(false)
