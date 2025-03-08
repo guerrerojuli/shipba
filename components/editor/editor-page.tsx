@@ -8,31 +8,16 @@ import type { Document } from "@/types/document"
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable"
 
 export default function EditorPage() {
-  const [activeDocument, setActiveDocument] = useState<Document | null>(null)
   const [selectedText, setSelectedText] = useState<string>("")
+  const [activeDocument, setActiveDocument] = useState<Document | null>(null)
   const [documentContext, setDocumentContext] = useState<Document[]>([])
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   const handleDocumentSelect = (document: Document) => {
     setActiveDocument(document)
   }
 
-  const handleTextSelect = (text: string) => {
-    setSelectedText(text)
-  }
-
-  const handleAddDocumentContext = (document: Document) => {
-    if (!documentContext.some((doc) => doc.id === document.id)) {
-      setDocumentContext([...documentContext, document])
-    }
-  }
-
   const handleRemoveDocumentContext = (documentId: string) => {
     setDocumentContext(documentContext.filter((doc) => doc.id !== documentId))
-  }
-
-  const toggleSidebar = () => {
-    setSidebarCollapsed(!sidebarCollapsed)
   }
 
   return (
@@ -46,7 +31,7 @@ export default function EditorPage() {
         <ResizablePanelGroup direction="horizontal" className="flex-1 h-full">
           <ResizablePanel defaultSize={70} minSize={40}>
             {activeDocument ? (
-              <Editor document={activeDocument} onTextSelect={handleTextSelect} />
+              <Editor document={activeDocument} onAddToChat={setSelectedText} />
             ) : (
               <div className="flex h-full items-center justify-center text-muted-foreground">
                 Select or create a document to get started
@@ -62,6 +47,7 @@ export default function EditorPage() {
               documentContext={documentContext}
               onRemoveDocumentContext={handleRemoveDocumentContext}
               activeDocument={activeDocument}
+              onRemoveSelectedText={() => setSelectedText("")}
             />
           </ResizablePanel>
         </ResizablePanelGroup>

@@ -17,10 +17,10 @@ import { MessageSquare, Plus } from "lucide-react"
 
 interface EditorProps {
   document: Document
-  onTextSelect: (text: string) => void
+  onAddToChat: (text: string) => void
 }
 
-export function Editor({ document: documentData, onTextSelect }: EditorProps) {
+export function Editor({ document: documentData, onAddToChat }: EditorProps) {
   const { user } = useUser()
   const providerRef = useRef<HocuspocusProvider>()
   const [editorReady, setEditorReady] = useState(false)
@@ -63,7 +63,6 @@ export function Editor({ document: documentData, onTextSelect }: EditorProps) {
         if (from !== to) {
           const text = editor.state.doc.textBetween(from, to, " ")
           setSelectedText(text)
-          onTextSelect(text)
 
           // Calculate position for transformer
           if (editorRef.current) {
@@ -72,11 +71,20 @@ export function Editor({ document: documentData, onTextSelect }: EditorProps) {
               const range = selection.getRangeAt(0)
               const rect = range.getBoundingClientRect()
               const editorRect = editorRef.current.getBoundingClientRect()
+              const scrollTop = editorRef.current.scrollTop
 
-              setTransformerPosition({
-                x: rect.left - editorRect.left + rect.width / 2,
-                y: rect.bottom - editorRect.top + 10,
-              })
+              // Calculate initial position
+              let x = rect.left - editorRect.left + rect.width / 2
+              let y = rect.bottom - editorRect.top + scrollTop + 10
+
+              // Ensure the transformer doesn't go outside the editor bounds
+              const maxX = editorRect.width - 20 // Leave some padding
+              const maxY = editorRect.height - 20
+
+              x = Math.max(20, Math.min(x, maxX)) // Keep within horizontal bounds
+              y = Math.max(20, Math.min(y, maxY)) // Keep within vertical bounds
+
+              setTransformerPosition({ x, y })
               setShowTransformer(true)
             }
           }
@@ -113,7 +121,7 @@ export function Editor({ document: documentData, onTextSelect }: EditorProps) {
   }
 
   const handleAddToChat = () => {
-    // This would add the selected text to the chat context
+    onAddToChat(selectedText)
     setShowTransformer(false)
   }
 
@@ -153,6 +161,9 @@ export function Editor({ document: documentData, onTextSelect }: EditorProps) {
               editor.chain().focus().deleteRange({ from, to }).insertContentAt(from, text).run()
             }}
             onAddToChat={handleAddToChat}
+            onClose={() => {
+              setShowTransformer(false)
+            }}
           />
         )}
       </div>

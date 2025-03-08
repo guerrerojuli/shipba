@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition } from "react"
+import { useState, useTransition, useEffect } from "react"
 import { MessageSquarePlus, Wand2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -18,6 +18,7 @@ interface TransformerToolProps {
   selectedText: string
   setText: (text: string) => void
   onAddToChat: () => void
+  onClose: () => void
 }
 
 const presets = [
@@ -27,18 +28,28 @@ const presets = [
   { name: "Formal Tone", prompt: "Rewrite in a formal tone" },
 ]
 
-
 export function TransformerTool({
   position,
   selectedText,
   setText,
   onAddToChat,
+  onClose,
 }: TransformerToolProps) {
   const [prompt, setPrompt] = useState<string>("")
   const [selectedPreset, setSelectedPreset] = useState<string>("")
   const [state, setState] = useState<"menu" | "prompt" | "confirmation">("menu")
   const [edit, setEdit] = useState<string>("")
   const [isLoading, startTransition] = useTransition()
+
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose()
+      }
+    }
+    window.addEventListener('keydown', handleEsc)
+    return () => window.removeEventListener('keydown', handleEsc)
+  }, [onClose])
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -137,7 +148,7 @@ export function TransformerTool({
               type="button"
               variant="ghost"
               size="sm"
-              onClick={() => setState("menu")}
+              onClick={() => onClose()}
               disabled={isLoading}
             >
               Cancel
@@ -172,7 +183,7 @@ export function TransformerTool({
               </div>
             </div>
             <div>
-            <div className="text-xs text-muted-foreground mb-2">Original Text:</div>
+              <div className="text-xs text-muted-foreground mb-2">Edited Text:</div>
               <div className="rounded-md bg-muted/50 p-2 text-sm text-green-500">
                 {edit}
               </div>
@@ -182,7 +193,7 @@ export function TransformerTool({
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => setState("menu")}
+              onClick={() => onClose()}
             >
               Cancel
             </Button>
