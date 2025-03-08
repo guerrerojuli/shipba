@@ -51,7 +51,9 @@ async function getDocument(documentId: string) {
 }
 
 export async function createDocument(document: DocumentInsert) {
-    return db.insert(documents).values(document);
+    const newDocument = await db.insert(documents).values(document);
+    revalidateTag(CACHE_TAGS.userFiles(document.userId));
+    return newDocument;
 }
 
 export async function updateDocument(documentId: string, document: DocumentInsert) {
@@ -59,5 +61,7 @@ export async function updateDocument(documentId: string, document: DocumentInser
 }
 
 export async function deleteDocument(documentId: string) {
-    return db.delete(documents).where(eq(documents.id, documentId));
+    const document = await db.delete(documents).where(eq(documents.id, documentId)).returning();
+    revalidateTag(CACHE_TAGS.userFiles(document[0].userId));
+    revalidateTag(CACHE_TAGS.file(documentId));
 }
