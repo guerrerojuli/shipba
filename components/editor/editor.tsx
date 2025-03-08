@@ -1,13 +1,13 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useEditor, EditorContent } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 import Placeholder from "@tiptap/extension-placeholder"
 import Collaboration from "@tiptap/extension-collaboration"
 import CollaborationCursor from "@tiptap/extension-collaboration-cursor"
 import Link from "@tiptap/extension-link"
-import { HocuspocusProvider } from '@hocuspocus/provider'
+import { HocuspocusProvider, TiptapCollabProvider } from '@hocuspocus/provider'
 import type { Document } from "@/types/document"
 import { EditorToolbar } from "./editor-toolbar"
 import { TransformerTool } from "./transformer-tool"
@@ -19,6 +19,7 @@ import Text from '@tiptap/extension-text'
 import Highlight from '@tiptap/extension-highlight'
 import Heading from '@tiptap/extension-heading'
 import Code from '@tiptap/extension-code'
+import * as Y from 'yjs'
 
 
 interface EditorProps {
@@ -28,7 +29,13 @@ interface EditorProps {
 
 export function Editor({ document: documentData, onTextSelect }: EditorProps) {
   const { user } = useUser()
-  const providerRef = useRef<HocuspocusProvider>()
+  const doc = new Y.Doc() // Initialize Y.Doc for shared editing
+  const provider = new TiptapCollabProvider({
+    appId: 'y9drlw8m',          // Reemplaza con el ID de tu aplicación desde Tiptap Cloud
+    name: `Test Doc ${user?.id}`,    // Un identificador único para el documento (p.ej., un UUID)
+    token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3NDE0NzcxMjQsIm5iZiI6MTc0MTQ3NzEyNCwiZXhwIjoxNzQxNTYzNTI0LCJpc3MiOiJodHRwczovL2Nsb3VkLnRpcHRhcC5kZXYiLCJhdWQiOiJ5OWRybHc4bSJ9.aaKIgmOU6drtOCMXAtZV0VSrUJzC2cHj9472ToqmmWM',
+    document: doc,         // El documento Yjs compartido
+  });
   const [editorReady, setEditorReady] = useState(false)
   const [selectedText, setSelectedText] = useState("")
   const [transformerPosition, setTransformerPosition] = useState<{ x: number; y: number } | null>(null)
@@ -59,20 +66,12 @@ export function Editor({ document: documentData, onTextSelect }: EditorProps) {
             class: 'text-blue-500',
           },
         }),
-        ...(editorReady && providerRef.current
-          ? [
-            Collaboration.configure({
-              document: providerRef.current.document,
-            }),
-            CollaborationCursor.configure({
-              provider: providerRef.current,
-              user: {
-                name: user?.fullName || "Anonymous",
-                color: "#" + Math.floor(Math.random() * 16777215).toString(16),
-              },
-            }),
-          ]
-          : []),
+        // Document,
+        Paragraph,
+        Text,
+        Collaboration.configure({
+          document: provider.document, // Configure Y.Doc for collaboration
+        }),
       ],
       content: documentData.content,
       onSelectionUpdate: ({ editor }) => {
@@ -102,32 +101,17 @@ export function Editor({ document: documentData, onTextSelect }: EditorProps) {
         }
       },
     },
-    [editorReady]
   )
 
+  useEffect(() => {
+    const provider = new TiptapCollabProvider({
+      name: 'document.name', // Unique document identifier for syncing. This is your document name.
+      appId: '7j9y6m10', // Your Cloud Dashboard AppID or `baseURL` for on-premises
+      token: "asd", // Your JWT token
+      document: doc,
+    })
+  }, [])
 
-  if (!providerRef.current) {
-    try {
-      providerRef.current = new HocuspocusProvider({
-        url: 'ws://127.0.0.1:1234',
-        name: `document-${documentData.id}`,
-        token: 'development-token',
-        onConnect: () => {
-          console.log(`Conexión establecida con Hocuspocus. Document id: ${documentData.id}`)
-          setEditorReady(true)
-        },
-        onDisconnect: () => {
-          console.log('Desconectado de Hocuspocus')
-        },
-        onClose: (data: any) => {
-          console.error('Error de Hocuspocus:', data)
-        }
-      })
-    } catch (error) {
-      console.error("Error al inicializar Hocuspocus:", error)
-      setEditorReady(true)
-    }
-  }
 
   const handleAddToChat = () => {
     // This would add the selected text to the chat context
@@ -158,7 +142,7 @@ export function Editor({ document: documentData, onTextSelect }: EditorProps) {
       <EditorToolbar editor={editor} />
 
       <div className="relative flex-1 w-full overflow-auto" ref={editorRef}>
-        <EditorContent  editor={editor} className="min-h-full w-full p-4" />
+        <EditorContent editor={editor} className="min-h-full w-full p-4" />
 
         {showTransformer && transformerPosition && (
           <TransformerTool

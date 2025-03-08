@@ -54,7 +54,7 @@ importers:
         specifier: ^2.11.5
         version: 2.11.5(@tiptap/core@2.11.5(@tiptap/pm@2.11.5))(@tiptap/pm@2.11.5)(y-prosemirror@1.2.17(prosemirror-model@1.24.1)(prosemirror-state@1.4.3)(prosemirror-view@1.38.1)(y-protocols@1.0.6(yjs@13.6.24))(yjs@13.6.24))
       '@tiptap/extension-collaboration-cursor':
-        specifier: ^2.1.16
+        specifier: ^2.11.5
         version: 2.11.5(@tiptap/core@2.11.5(@tiptap/pm@2.11.5))(y-prosemirror@1.2.17(prosemirror-model@1.24.1)(prosemirror-state@1.4.3)(prosemirror-view@1.38.1)(y-protocols@1.0.6(yjs@13.6.24))(yjs@13.6.24))
       '@tiptap/extension-heading':
         specifier: ^2.11.5
@@ -75,10 +75,10 @@ importers:
         specifier: ^2.11.5
         version: 2.11.5(@tiptap/core@2.11.5(@tiptap/pm@2.11.5))
       '@tiptap/react':
-        specifier: ^2.1.16
+        specifier: ^2.11.5
         version: 2.11.5(@tiptap/core@2.11.5(@tiptap/pm@2.11.5))(@tiptap/pm@2.11.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@tiptap/starter-kit':
-        specifier: ^2.1.16
+        specifier: ^2.11.5
         version: 2.11.5
       ai:
         specifier: ^4.1.54
@@ -119,6 +119,9 @@ importers:
       y-prosemirror:
         specifier: ^1.2.17
         version: 1.2.17(prosemirror-model@1.24.1)(prosemirror-state@1.4.3)(prosemirror-view@1.38.1)(y-protocols@1.0.6(yjs@13.6.24))(yjs@13.6.24)
+      y-protocols:
+        specifier: ^1.0.6
+        version: 1.0.6(yjs@13.6.24)
       y-webrtc:
         specifier: ^10.2.5
         version: 10.3.0(yjs@13.6.24)
@@ -126,7 +129,7 @@ importers:
         specifier: ^2.1.0
         version: 2.1.0(yjs@13.6.24)
       yjs:
-        specifier: ^13.6.10
+        specifier: ^13.6.24
         version: 13.6.24
     devDependencies:
       '@types/node':
