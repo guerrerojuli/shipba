@@ -73,3 +73,34 @@
 .ProseMirror .suggestion {
   @apply bg-green-100 dark:bg-green-900/30 px-1 py-0.5 rounded;
 }
+
+/* Estilos para los encabezados del editor */
+.ProseMirror h1 {
+  @apply text-4xl font-bold mt-6 mb-4;
+}
+
+.ProseMirror h2 {
+  @apply text-3xl font-semibold mt-5 mb-3;
+}
+
+.ProseMirror h3 {
+  @apply text-2xl font-medium mt-4 mb-2;
+}
+
+/* Estilos para bloques de código */
+.ProseMirror .editor-code {
+  @apply bg-zinc-950 text-zinc-50 dark:bg-zinc-900 dark:text-zinc-50;
+  @apply rounded-lg px-4 py-3 my-4;
+  @apply font-mono text-sm leading-relaxed;
+  @apply shadow-lg;
+  @apply border border-zinc-800;
+}
+
+/* Estilos para código en línea */
+.ProseMirror code {
+  @apply bg-zinc-100 dark:bg-zinc-800;
+  @apply text-zinc-900 dark:text-zinc-100;
+  @apply rounded px-1.5 py-0.5;
+  @apply font-mono text-sm;
+  @apply border border-zinc-200 dark:border-zinc-700;
+}
