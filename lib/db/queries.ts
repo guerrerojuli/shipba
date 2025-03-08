@@ -15,6 +15,10 @@ function invalidateTags(tags: (string | undefined)[]) {
     tags.forEach(tag => tag && revalidateTag(tag))
 }
 
+export function startLoadingList(userId: string) {
+    revalidateTag(CACHE_TAGS.userFiles(userId));
+}
+
 export function getUserDocumentsListCached(userId: string) {
     return nextCache(
         getUserDocumentsList,
@@ -57,7 +61,10 @@ export async function createDocument(document: DocumentInsert) {
 }
 
 export async function updateDocument(documentId: string, document: DocumentInsert) {
-    return db.update(documents).set(document).where(eq(documents.id, documentId));
+    const updatedDoc = await db.update(documents).set(document).where(eq(documents.id, documentId)).returning();
+    startLoadingList(document.userId);
+    revalidateTag(CACHE_TAGS.file(documentId));
+    return updatedDoc;
 }
 
 export async function deleteDocument(documentId: string) {
