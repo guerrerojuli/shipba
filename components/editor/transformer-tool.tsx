@@ -35,6 +35,7 @@ export function TransformerTool({
   onAddToChat,
 }: TransformerToolProps) {
   const [prompt, setPrompt] = useState<string>("")
+  const [selectedPreset, setSelectedPreset] = useState<string>("")
   const [state, setState] = useState<"menu" | "prompt" | "confirmation">("menu")
   const [edit, setEdit] = useState<string>("")
   const [isLoading, startTransition] = useTransition()
@@ -57,6 +58,7 @@ export function TransformerTool({
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     e.preventDefault()
     setPrompt(e.target.value)
+    setSelectedPreset("")
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -76,104 +78,115 @@ export function TransformerTool({
         transform: "translateX(-50%)",
       }}
     >
-      {
-        state === "menu" && (
-          <div className="flex gap-2 rounded-lg bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75 p-2 shadow-lg border">
-            <Button variant="ghost" size="sm" className="flex items-center gap-2 hover:bg-muted" onClick={() => setState("prompt")}>
-              <Wand2 className="h-4 w-4" />
-              Edit
+      {state === "menu" && (
+        <div className="flex flex-col gap-2 rounded-lg bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75 p-3 shadow-lg border min-w-[200px]">
+          <div className="text-sm font-medium mb-1">Edit Selection</div>
+          <div className="flex flex-col gap-2">
+            <Button variant="secondary" size="sm" className="w-full justify-start" onClick={() => setState("prompt")}>
+              <Wand2 className="h-4 w-4 mr-2" />
+              Edit Text
             </Button>
-            <Button variant="ghost" size="sm" className="flex items-center gap-2 hover:bg-muted" onClick={() => onAddToChat()}>
-              <MessageSquarePlus className="h-4 w-4" />
+            <Button variant="secondary" size="sm" className="w-full justify-start" onClick={() => onAddToChat()}>
+              <MessageSquarePlus className="h-4 w-4 mr-2" />
               Add to Chat
             </Button>
           </div>
-        )
-      }
-      {
-        state === "prompt" && (
-          <form
-            onSubmit={handleSubmit}
-            className="flex gap-2 rounded-lg bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75 p-2 shadow-lg border"
-          >
-            <div className="flex flex-col gap-2">
-              <Select onValueChange={(value) => setPrompt(presets.find(p => p.name === value)?.prompt || "")}>
-                <SelectTrigger className="w-[300px]">
-                  <SelectValue placeholder="Select a preset..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {presets.map((preset) => (
-                    <SelectItem key={preset.name} value={preset.name}>
-                      {preset.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+        </div>
+      )}
+      {state === "prompt" && (
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-3 rounded-lg bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75 p-3 shadow-lg border"
+        >
+          <div className="text-sm font-medium">Edit Text</div>
+          <div className="space-y-3">
+            <Select 
+              value={selectedPreset}
+              onValueChange={(value) => {
+                setSelectedPreset(value)
+                setPrompt(presets.find(p => p.name === value)?.prompt || "")
+              }}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Choose an edit type..." />
+              </SelectTrigger>
+              <SelectContent>
+                {presets.map((preset) => (
+                  <SelectItem key={preset.name} value={preset.name}>
+                    {preset.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="space-y-2">
+              <div className="text-xs text-muted-foreground">
+                {selectedPreset ? "Preset prompt (edit to customize)" : "Custom prompt"}
+              </div>
               <Textarea
                 value={prompt}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
-                placeholder="Enter a prompt"
+                placeholder="Enter instructions..."
                 disabled={isLoading}
                 className="min-w-[300px] min-h-[100px] resize-y"
               />
             </div>
-            <div className="flex flex-col gap-2">
-              <Button
-                type="submit"
-                variant="ghost"
-                size="sm"
-                className="flex items-center gap-2 hover:bg-muted"
-                disabled={isLoading}
-              >
-                <Wand2 className="h-4 w-4" />
-                Edit
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="flex items-center gap-2 hover:bg-muted"
-                onClick={() => setState("menu")}
-                disabled={isLoading}
-              >
-                Cancel
-              </Button>
-            </div>
-          </form>
-        )
-      }
-      {
-        state === "confirmation" && (
-          <div className="flex gap-2 rounded-lg bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75 p-2 shadow-lg border">
-            <Textarea
-              value={edit}
-              disabled={true}
-              className="min-w-[300px] min-h-[100px] resize-y overflow-auto"
-            />
-            <div className="flex flex-col gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="flex items-center gap-2 hover:bg-muted"
-                onClick={() => setText(edit)}
-                disabled={isLoading}
-              >
-                Accept
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="flex items-center gap-2 hover:bg-muted"
-                onClick={() => setState("menu")}
-                disabled={isLoading}
-              >
-                Cancel
-              </Button>
-            </div>
           </div>
-        )
-      }
+          <div className="flex justify-end gap-2 pt-2 border-t">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setState("menu")}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="default"
+              size="sm"
+              disabled={isLoading}
+              className="flex items-center gap-2"
+            >
+              {isLoading ? (
+                <>Processing...</>
+              ) : (
+                <>
+                  <Wand2 className="h-4 w-4" />
+                  Edit
+                </>
+              )}
+            </Button>
+          </div>
+        </form>
+      )}
+      {state === "confirmation" && (
+        <div className="flex flex-col gap-3 rounded-lg bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75 p-3 shadow-lg border">
+          <div className="text-sm font-medium">Review Changes</div>
+          <Textarea
+            value={edit}
+            readOnly
+            className="min-w-[300px] min-h-[100px] resize-y overflow-auto"
+          />
+          <div className="flex justify-end gap-2 pt-2 border-t">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setState("menu")}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => setText(edit)}
+            >
+              Apply Changes
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
