@@ -1,20 +1,25 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useState, useTransition } from "react"
 import { DocumentSidebar } from "@/components/sidebar/document-sidebar"
 import { Editor } from "@/components/editor/editor"
 import { AssistantSidebar } from "@/components/sidebar/assistant-sidebar"
-import type { Document } from "@/types/document"
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable"
+import { DocumentInfo, DocumentSelect } from "@/lib/db/types"
+import { getDocument } from "@/actions/documentActions"
 
 export default function EditorPage() {
   const [selectedText, setSelectedText] = useState<string>("")
-  const [activeDocument, setActiveDocument] = useState<Document | null>(null)
-  const [documentContext, setDocumentContext] = useState<Document[]>([])
+  const [activeDocument, setActiveDocument] = useState<DocumentSelect | null>(null)
+  const [documentContext, setDocumentContext] = useState<DocumentSelect[]>([])
+  const [loading, startTransition] = useTransition();
 
-  const handleDocumentSelect = (document: Document) => {
-    setActiveDocument(document)
-  }
+  const handleDocumentSelect = useCallback(async (document: DocumentInfo) => {
+    startTransition(async () => {
+      const documentData = await getDocument(document.id);
+      setActiveDocument(documentData);
+    })
+  }, [])
 
   const handleRemoveDocumentContext = (documentId: string) => {
     setDocumentContext(documentContext.filter((doc) => doc.id !== documentId))
@@ -30,8 +35,8 @@ export default function EditorPage() {
         
         <ResizablePanelGroup direction="horizontal" className="flex-1 h-full">
           <ResizablePanel defaultSize={70} minSize={40}>
-            {activeDocument ? (
-              <Editor document={activeDocument} onAddToChat={setSelectedText} />
+            {activeDocument || loading ? (
+              <Editor loading={loading} document={activeDocument} onAddToChat={setSelectedText} />
             ) : (
               <div className="flex h-full items-center justify-center text-muted-foreground">
                 Select or create a document to get started

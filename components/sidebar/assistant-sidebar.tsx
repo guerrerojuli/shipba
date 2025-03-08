@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { useChat } from "@ai-sdk/react"
-import { DocumentInfo, DocumentSelect } from "@/lib/db/types"
+import { DocumentSelect } from "@/lib/db/types"
 
 interface AssistantSidebarProps {
   selectedText: string

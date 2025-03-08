@@ -51,7 +51,7 @@ export function getDocumentCached(documentId: string) {
   }
   
 async function getDocument(documentId: string) {
-    return db.select().from(documents).where(eq(documents.id, documentId));
+    return db.select().from(documents).where(eq(documents.id, documentId)).limit(1);
 }
 
 export async function createDocument(document: DocumentInsert) {
@@ -61,10 +61,7 @@ export async function createDocument(document: DocumentInsert) {
 }
 
 export async function updateDocument(documentId: string, document: DocumentInsert) {
-    const updatedDoc = await db.update(documents).set(document).where(eq(documents.id, documentId)).returning();
-    startLoadingList(document.userId);
-    revalidateTag(CACHE_TAGS.file(documentId));
-    return updatedDoc;
+    return db.update(documents).set(document).where(eq(documents.id, documentId));
 }
 
 export async function deleteDocument(documentId: string) {
