@@ -14,6 +14,12 @@ import { TransformerTool } from "./transformer-tool"
 import { useUser } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
 import { MessageSquare, Plus } from "lucide-react"
+import Paragraph from '@tiptap/extension-paragraph'
+import Text from '@tiptap/extension-text'
+import Highlight from '@tiptap/extension-highlight'
+import Heading from '@tiptap/extension-heading'
+import Code from '@tiptap/extension-code'
+
 
 interface EditorProps {
   document: Document
@@ -35,12 +41,23 @@ export function Editor({ document: documentData, onTextSelect }: EditorProps) {
         StarterKit.configure({
           history: false,
         }),
+        Heading.configure({
+          levels: [1, 2, 3],
+        }),
+        Code.configure({
+          HTMLAttributes: {
+            class: 'editor-code',
+          },
+        }),
         Placeholder.configure({
           placeholder: "Start writing or upload a document...",
         }),
         Link.configure({
-          openOnClick: false,
+          openOnClick: true,
           linkOnPaste: true,
+          HTMLAttributes: {
+            class: 'text-blue-500',
+          },
         }),
         ...(editorReady && providerRef.current
           ? [
@@ -141,11 +158,11 @@ export function Editor({ document: documentData, onTextSelect }: EditorProps) {
       <EditorToolbar editor={editor} />
 
       <div className="relative flex-1 w-full overflow-auto" ref={editorRef}>
-        <EditorContent editor={editor} className="min-h-full w-full p-4" />
+        <EditorContent  editor={editor} className="min-h-full w-full p-4" />
 
         {showTransformer && transformerPosition && (
-          <TransformerTool 
-            position={transformerPosition} 
+          <TransformerTool
+            position={transformerPosition}
             selectedText={selectedText}
             setText={(text: string) => {
               if (!editor) return
