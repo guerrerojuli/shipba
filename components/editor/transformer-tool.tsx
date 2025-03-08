@@ -164,11 +164,20 @@ export function TransformerTool({
       {state === "confirmation" && (
         <div className="flex flex-col gap-3 rounded-lg bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75 p-3 shadow-lg border">
           <div className="text-sm font-medium">Review Changes</div>
-          <Textarea
-            value={edit}
-            readOnly
-            className="min-w-[300px] min-h-[100px] resize-y overflow-auto"
-          />
+          <div className="space-y-3">
+            <div>
+              <div className="text-xs text-muted-foreground mb-2">Original Text:</div>
+              <div className="rounded-md bg-muted/50 p-2 text-sm text-red-500">
+                {selectedText}
+              </div>
+            </div>
+            <div>
+            <div className="text-xs text-muted-foreground mb-2">Original Text:</div>
+              <div className="rounded-md bg-muted/50 p-2 text-sm text-green-500">
+                {edit}
+              </div>
+            </div>
+          </div>
           <div className="flex justify-end gap-2 pt-2 border-t">
             <Button
               variant="ghost"
