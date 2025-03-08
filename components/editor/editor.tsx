@@ -8,25 +8,24 @@ import Collaboration from "@tiptap/extension-collaboration"
 import CollaborationCursor from "@tiptap/extension-collaboration-cursor"
 import Link from "@tiptap/extension-link"
 import { HocuspocusProvider } from '@hocuspocus/provider'
-import type { Document } from "@/types/document"
 import { EditorToolbar } from "./editor-toolbar"
 import { TransformerTool } from "./transformer-tool"
 import { useUser } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
 import { MessageSquare, Plus } from "lucide-react"
-import Paragraph from '@tiptap/extension-paragraph'
-import Text from '@tiptap/extension-text'
-import Highlight from '@tiptap/extension-highlight'
 import Heading from '@tiptap/extension-heading'
 import Code from '@tiptap/extension-code'
 
+import { DocumentSelect } from "@/lib/db/types"
+import { Skeleton } from "../ui/skeleton"
 
 interface EditorProps {
-  document: Document
+  loading: boolean
+  document: DocumentSelect | null
   onAddToChat: (text: string) => void
 }
 
-export function Editor({ document: documentData, onAddToChat }: EditorProps) {
+export function Editor({ loading, document: documentData, onAddToChat }: EditorProps) {
   const { user } = useUser()
   const providerRef = useRef<HocuspocusProvider>()
   const [editorReady, setEditorReady] = useState(false)
@@ -74,7 +73,8 @@ export function Editor({ document: documentData, onAddToChat }: EditorProps) {
           ]
           : []),
       ],
-      content: documentData.content,
+      content: loading ? "Loading..." : documentData?.content || "",
+      editable: !loading,
       onSelectionUpdate: ({ editor }) => {
         const { from, to } = editor.state.selection
         if (from !== to) {
@@ -110,18 +110,18 @@ export function Editor({ document: documentData, onAddToChat }: EditorProps) {
         }
       },
     },
-    [editorReady]
+    [editorReady, documentData, loading]
   )
 
 
-  if (!providerRef.current) {
+  if (!providerRef.current && documentData) {
     try {
       providerRef.current = new HocuspocusProvider({
         url: 'ws://127.0.0.1:1234',
         name: `document-${documentData.id}`,
         token: 'development-token',
         onConnect: () => {
-          console.log(`Conexión establecida con Hocuspocus. Document id: ${documentData.id}`)
+          console.log(`Conexión establecida con Hocuspocus. Document id: ${documentData?.id}`)
           setEditorReady(true)
         },
         onDisconnect: () => {
@@ -146,7 +146,10 @@ export function Editor({ document: documentData, onAddToChat }: EditorProps) {
     <div className="flex h-full w-full flex-col overflow-hidden">
       <div className="flex items-center justify-between border-b p-2">
         <div className="flex items-center gap-2">
-          <h1 className="text-xl font-semibold">{documentData.title}</h1>
+          {loading ? 
+            <Skeleton className="h-4 w-10" /> : 
+            <h1 className="text-xl font-semibold">{documentData?.name || "Untitled Document"}</h1>
+          }
         </div>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm">

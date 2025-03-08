@@ -6,12 +6,13 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { useChat } from "@ai-sdk/react"
+import { DocumentSelect } from "@/lib/db/types"
 
 interface AssistantSidebarProps {
   selectedText: string
-  documentContext: Document[]
+  documentContext: DocumentSelect[]
   onRemoveDocumentContext: (documentId: string) => void
-  activeDocument: Document | null
+  activeDocument: DocumentSelect | null
   onRemoveSelectedText: () => void
 }
 
@@ -62,7 +63,7 @@ export function AssistantSidebar({
           {documentContext.length > 0 ? (
             documentContext.map((doc) => (
               <Badge key={doc.id} variant="secondary" className="flex items-center gap-1">
-                {doc.title}
+                {doc.name}
                 <Button
                   variant="ghost"
                   size="icon"

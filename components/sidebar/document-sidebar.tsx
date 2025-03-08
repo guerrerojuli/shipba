@@ -1,46 +1,57 @@
 "use client"
 
-import { useState } from "react"
-import { Plus, File, Upload } from "lucide-react"
+import { startTransition, useCallback, useEffect, useState, useTransition } from "react"
+import { Plus, File, Upload, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import type { Document } from "@/types/document"
 import { useUser } from "@clerk/nextjs"
 import { Sidebar, SidebarContent, SidebarHeader, SidebarProvider } from "@/components/ui/sidebar"
+import { createDocument, getDocumentList } from "@/actions/documentActions"
+import { DocumentInfo, DocumentInsert } from "@/lib/db/types"
+import { Skeleton } from "../ui/skeleton"
 
 interface DocumentSidebarProps {
-  activeDocument: Document | null
-  onDocumentSelect: (document: Document) => void
+  activeDocument: DocumentInfo | null
+  onDocumentSelect: (document: DocumentInfo) => void
 }
 
 export function DocumentSidebar({ activeDocument, onDocumentSelect }: DocumentSidebarProps) {
-  const [documents, setDocuments] = useState<Document[]>([
-    { id: "1", title: "Getting Started", content: "Welcome to the AI-powered document editor!" },
-  ])
+  const { user } = useUser();
+  const [loadingList, startLoadingList] = useTransition();
+  const [loadingCreate, startLoadingCreate] = useTransition();
+  const [documents, setDocuments] = useState<DocumentInfo[]>([])
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
 
-  const handleCreateDocument = () => {
-    const newDocument: Document = {
-      id: Date.now().toString(),
-      title: "Untitled Document",
-      content: "",
-    }
-    setDocuments([...documents, newDocument])
-    onDocumentSelect(newDocument)
-  }
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      startLoadingList(async () => {
+        const documents = await getDocumentList();
+        setDocuments(documents);
+      })
+    };
+    fetchDocuments();
+  }, []);
+
+  const handleCreateDocument = useCallback(async () => {
+    startLoadingCreate(async () => {
+      if (!user) return;
+      const newDocument: DocumentInsert = {
+        id: crypto.randomUUID(),
+        name: "Untitled Document",
+        createdBy: user.emailAddresses[0].emailAddress,
+        content: "",
+        userId: user?.id,
+        }
+      const document = await createDocument(newDocument);
+      setDocuments([...documents, document])
+    })
+  }, [user, documents])
 
   const handleUploadDocument = (file: File) => {
-    // In a real app, this would process the file and extract content
     const reader = new FileReader()
     reader.onload = (e) => {
       const content = e.target?.result as string
-      const newDocument: Document = {
-        id: Date.now().toString(),
-        title: file.name,
-        content: content || "Failed to load content",
-      }
-      setDocuments([...documents, newDocument])
-      onDocumentSelect(newDocument)
+      console.log(content);
     }
     reader.readAsText(file)
     setIsUploadModalOpen(false)
@@ -55,14 +66,18 @@ export function DocumentSidebar({ activeDocument, onDocumentSelect }: DocumentSi
             <Button variant="ghost" size="icon" onClick={() => setIsUploadModalOpen(true)}>
               <Upload className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={handleCreateDocument}>
-              <Plus className="h-4 w-4" />
+            <Button variant="ghost" size="icon" onClick={() => {handleCreateDocument();}}>
+              {loadingCreate ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
             </Button>
           </div>
         </SidebarHeader>
         <SidebarContent className="h-[calc(100%-4rem)] overflow-auto">
           <div className="space-y-1 p-2">
-            {documents.map((document) => (
+            {loadingList ? <>
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+            </> : documents.map((document) => (
               <Button
                 key={document.id}
                 variant={activeDocument?.id === document.id ? "secondary" : "ghost"}
@@ -70,7 +85,7 @@ export function DocumentSidebar({ activeDocument, onDocumentSelect }: DocumentSi
                 onClick={() => onDocumentSelect(document)}
               >
                 <File className="mr-2 h-4 w-4" />
-                <span className="truncate">{document.title}</span>
+                <span className="truncate">{document.name}</span>
               </Button>
             ))}
           </div>
