@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import type { Document as AppDocument } from "@/types/document"
 
 interface TransformerToolProps {
   position: { x: number; y: number }
@@ -19,6 +20,7 @@ interface TransformerToolProps {
   setText: (text: string) => void
   onAddToChat: () => void
   onClose: () => void
+  activeDocument: AppDocument | null
 }
 
 const presets = [
@@ -34,6 +36,7 @@ export function TransformerTool({
   setText,
   onAddToChat,
   onClose,
+  activeDocument,
 }: TransformerToolProps) {
   const [prompt, setPrompt] = useState<string>("")
   const [selectedPreset, setSelectedPreset] = useState<string>("")
@@ -56,7 +59,7 @@ export function TransformerTool({
     startTransition(async () => {
       const response = await fetch("/api/transform", {
         method: "POST",
-        body: JSON.stringify({ text: selectedText, prompt }),
+        body: JSON.stringify({ text: selectedText, prompt, activeDocument }),
       })
 
       const data = await response.json()

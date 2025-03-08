@@ -13,7 +13,7 @@
     "db:check": "drizzle-kit check",
     "websocket-server": "npx @hocuspocus/cli --port 1234 --sqlite --development-token development-token"
   },
-  "dependencies": {
+   "dependencies": {
     "@ai-sdk/google": "^1.1.20",
     "@ai-sdk/react": "^1.1.21",
     "@clerk/nextjs": "^4.29.9",

@@ -184,6 +184,7 @@ export function Editor({ loading, document: documentData, onAddToChat }: EditorP
             onClose={() => {
               setShowTransformer(false)
             }}
+            activeDocument={documentData}
           />
         )}
       </div>
