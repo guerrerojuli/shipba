@@ -1,39 +1,49 @@
-import { GoogleGenerativeAI } from "@google/generative-ai"
-
-// Create a client
-const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || "")
+import { google } from "@ai-sdk/google"
+import { generateText, streamText } from "ai"
+import { NextResponse } from "next/server"
 
 export async function POST(req: Request) {
-  const { text, prompt } = await req.json()
-
-  if (!text || !prompt) {
-    return Response.json({ error: "Text and prompt are required" }, { status: 400 })
-  }
-
   try {
-    // Initialize the model
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" })
+    const { text, prompt } = await req.json()
+    console.log("text: " + text)
+    console.log("prompt: " + prompt)
+
+    if (!text || !prompt) {
+      return NextResponse.json(
+        { error: "Text and prompt are required" },
+        { status: 400 }
+      )
+    }
+
+    const systemPrompt = `You are an expert writer and markdown specialist.
+Your task is to help transform and improve markdown text based on the user's request.
+Always maintain the original meaning and content while making the requested improvements.
+Follow markdown best practices and ensure proper formatting.
+Be clear and concise in your writing style.
+
+Original text:
+"""
+${text}
+"""
+
+Transformation request: ${prompt}
+
+Provide only the transformed markdown text without any additional explanations or comments.
+Don't add any other text or comments to the output. Do not add \`\`\`markdown to the output.
+`
 
     // Generate content
-    const result = await model.generateContent(`
-      You are an AI assistant helping with document editing.
-      
-      Original text:
-      """
-      ${text}
-      """
-      
-      User instruction: ${prompt}
-      
-      Provide only the transformed text without any additional explanations or comments.
-    `)
+    const result = await generateText({
+      model: google("gemini-2.0-flash-001"),
+      prompt: systemPrompt,
+    })
 
-    const response = result.response
-    const transformedText = response.text()
-
-    return Response.json({ text: transformedText })
+    return NextResponse.json({ text: result.text })
   } catch (error) {
-    console.error("Error transforming text:", error)
-    return Response.json({ error: "Failed to transform text" }, { status: 500 })
+    console.error("Error in transform route:", error)
+    return NextResponse.json(
+      { error: "Failed to process transformation request" },
+      { status: 500 }
+    )
   }
 }

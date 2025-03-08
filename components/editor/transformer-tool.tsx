@@ -1,37 +1,70 @@
 "use client"
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { useState, useTransition } from "react"
 import { MessageSquarePlus, Wand2 } from "lucide-react"
+
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 interface TransformerToolProps {
   position: { x: number; y: number }
-  onTransform: (prompt: string) => void
+  selectedText: string
+  setText: (text: string) => void
   onAddToChat: () => void
 }
 
-export function TransformerTool({ position, onTransform, onAddToChat }: TransformerToolProps) {
-  const [isTransforming, setIsTransforming] = useState(false)
-  const [prompt, setPrompt] = useState("")
-  const [showPresets, setShowPresets] = useState(false)
+const presets = [
+  { name: "Grammar Correction", prompt: "Fix grammar and spelling errors" },
+  { name: "Summarize", prompt: "Summarize this text concisely" },
+  { name: "Rewrite", prompt: "Rewrite this text" },
+  { name: "Formal Tone", prompt: "Rewrite in a formal tone" },
+]
 
-  const presets = [
-    { name: "Grammar Correction", prompt: "Fix grammar and spelling errors" },
-    { name: "Summarize", prompt: "Summarize this text concisely" },
-    { name: "Rewrite", prompt: "Rewrite this text" },
-    { name: "Formal Tone", prompt: "Rewrite in a formal tone" },
-  ]
 
-  const handleTransform = () => {
-    onTransform(prompt)
-    setIsTransforming(false)
-    setPrompt("")
+export function TransformerTool({
+  position,
+  selectedText,
+  setText,
+  onAddToChat,
+}: TransformerToolProps) {
+  const [prompt, setPrompt] = useState<string>("")
+  const [state, setState] = useState<"menu" | "prompt" | "confirmation">("menu")
+  const [edit, setEdit] = useState<string>("")
+  const [isLoading, startTransition] = useTransition()
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    startTransition(async () => {
+      const response = await fetch("/api/transform", {
+        method: "POST",
+        body: JSON.stringify({ text: selectedText, prompt }),
+      })
+
+      const data = await response.json()
+
+      setEdit(data.text)
+      setState("confirmation")
+    })
   }
 
-  const handlePresetClick = (presetPrompt: string) => {
-    setPrompt(presetPrompt)
-    setShowPresets(false)
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    e.preventDefault()
+    setPrompt(e.target.value)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      const form = e.currentTarget.form
+      if (form) form.requestSubmit()
+    }
   }
 
   return (
@@ -43,56 +76,104 @@ export function TransformerTool({ position, onTransform, onAddToChat }: Transfor
         transform: "translateX(-50%)",
       }}
     >
-      {!isTransforming ? (
-        <div className="flex gap-1 rounded-md bg-background p-1 shadow-lg">
-          <Button
-            variant="secondary"
-            size="sm"
-            className="flex items-center gap-1"
-            onClick={() => setIsTransforming(true)}
+      {
+        state === "menu" && (
+          <div className="flex gap-2 rounded-lg bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75 p-2 shadow-lg border">
+            <Button variant="ghost" size="sm" className="flex items-center gap-2 hover:bg-muted" onClick={() => setState("prompt")}>
+              <Wand2 className="h-4 w-4" />
+              Edit
+            </Button>
+            <Button variant="ghost" size="sm" className="flex items-center gap-2 hover:bg-muted" onClick={() => onAddToChat()}>
+              <MessageSquarePlus className="h-4 w-4" />
+              Add to Chat
+            </Button>
+          </div>
+        )
+      }
+      {
+        state === "prompt" && (
+          <form
+            onSubmit={handleSubmit}
+            className="flex gap-2 rounded-lg bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75 p-2 shadow-lg border"
           >
-            <Wand2 className="h-3 w-3" />
-            Transform
-          </Button>
-          <Button variant="ghost" size="sm" className="flex items-center gap-1" onClick={onAddToChat}>
-            <MessageSquarePlus className="h-3 w-3" />
-            Add to Chat
-          </Button>
-        </div>
-      ) : (
-        <div className="flex w-80 flex-col gap-2 rounded-md bg-background p-2 shadow-lg">
-          <div className="flex gap-1">
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setIsTransforming(false)}>
-              &larr;
-            </Button>
-            <Input
-              placeholder="Enter transformation prompt..."
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              className="h-8"
-            />
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowPresets(!showPresets)}>
-              &rarr;
-            </Button>
-          </div>
-
-          {showPresets && (
-            <div className="mt-1 grid grid-cols-2 gap-1">
-              {presets.map((preset) => (
-                <Button key={preset.name} variant="outline" size="sm" onClick={() => handlePresetClick(preset.prompt)}>
-                  {preset.name}
-                </Button>
-              ))}
+            <div className="flex flex-col gap-2">
+              <Select onValueChange={(value) => setPrompt(presets.find(p => p.name === value)?.prompt || "")}>
+                <SelectTrigger className="w-[300px]">
+                  <SelectValue placeholder="Select a preset..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {presets.map((preset) => (
+                    <SelectItem key={preset.name} value={preset.name}>
+                      {preset.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Textarea
+                value={prompt}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
+                placeholder="Enter a prompt"
+                disabled={isLoading}
+                className="min-w-[300px] min-h-[100px] resize-y"
+              />
             </div>
-          )}
-
-          <div className="flex justify-end">
-            <Button size="sm" onClick={handleTransform} disabled={!prompt.trim()}>
-              Transform
-            </Button>
+            <div className="flex flex-col gap-2">
+              <Button
+                type="submit"
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-2 hover:bg-muted"
+                disabled={isLoading}
+              >
+                <Wand2 className="h-4 w-4" />
+                Edit
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-2 hover:bg-muted"
+                onClick={() => setState("menu")}
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        )
+      }
+      {
+        state === "confirmation" && (
+          <div className="flex gap-2 rounded-lg bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75 p-2 shadow-lg border">
+            <Textarea
+              value={edit}
+              disabled={true}
+              className="min-w-[300px] min-h-[100px] resize-y overflow-auto"
+            />
+            <div className="flex flex-col gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-2 hover:bg-muted"
+                onClick={() => setText(edit)}
+                disabled={isLoading}
+              >
+                Accept
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex items-center gap-2 hover:bg-muted"
+                onClick={() => setState("menu")}
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
     </div>
   )
 }
