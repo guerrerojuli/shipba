@@ -14,7 +14,6 @@ import { TransformerTool } from "./transformer-tool"
 import { useUser } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
 import { MessageSquare, Plus } from "lucide-react"
-import { useCompletion } from "@ai-sdk/react"
 
 interface EditorProps {
   document: Document
