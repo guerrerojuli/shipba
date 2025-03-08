@@ -14,9 +14,6 @@ import { TransformerTool } from "./transformer-tool"
 import { useUser } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
 import { MessageSquare, Plus } from "lucide-react"
-import Paragraph from '@tiptap/extension-paragraph'
-import Text from '@tiptap/extension-text'
-import Highlight from '@tiptap/extension-highlight'
 import Heading from '@tiptap/extension-heading'
 import Code from '@tiptap/extension-code'
 
