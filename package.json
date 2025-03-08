@@ -6,22 +6,32 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "pnpx tsx lib/db/migrate.ts",
+    "db:studio": "drizzle-kit studio",
+    "db:check": "drizzle-kit check"
   },
   "dependencies": {
+    "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.40.0",
+    "next": "15.2.1",
+    "postgres": "^3.4.5",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "next": "15.2.1"
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
+    "drizzle-kit": "^0.30.5",
     "eslint": "^9",
     "eslint-config-next": "15.2.1",
-    "@eslint/eslintrc": "^3"
-  }
+    "tailwindcss": "^4",
+    "tsx": "^4.19.3",
+    "typescript": "^5"
+  },
+  "packageManager": "pnpm@9.15.3+sha512.1f79bc245a66eb0b07c5d4d83131240774642caaa86ef7d0434ab47c0d16f66b04e21e0c086eb61e62c77efc4d7f7ec071afad3796af64892fae66509173893a"
 }
