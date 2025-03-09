@@ -1,6 +1,6 @@
 "use server";
 import { createDocument as createDocumentDatabase, getDocumentCached, getUserDocumentsListCached, deleteDocument as deleteDocumentDatabase, updateDocument } from "@/lib/db/queries";
-import { DocumentInfo, DocumentInsert } from "@/lib/db/types";
+import { DocumentContent, DocumentInfo, DocumentInsert } from "@/lib/db/types";
 import { auth } from "@clerk/nextjs";
 import { currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
@@ -32,7 +32,10 @@ export async function uploadDocument(form: FormData) {
         name: file.name,
         createdBy: user.emailAddresses[0].emailAddress,
         userId: user.id,
-        content: markdown,
+        content: markdown.split("\n").map((line, index) => ({
+            index,
+            line
+        })),
     }
     return await createDocument(document);
 }
@@ -44,7 +47,7 @@ export async function createDocument(document: DocumentInsert) {
     return documentData as DocumentInfo;
 }
 
-export async function saveDocument(documentId: string, content: string) {
+export async function saveDocument(documentId: string, content: DocumentContent[]) {
     await updateDocument(documentId, { content });
     revalidatePath("/");
 }

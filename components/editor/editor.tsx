@@ -12,16 +12,13 @@ import { EditorToolbar } from "./editor-toolbar"
 import { TransformerTool } from "./transformer-tool"
 import { useUser } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
-import { AlertCircle, Check, CheckCircle, Delete, Download, Loader2, MessageSquare, Plus, Trash } from "lucide-react"
+import { AlertCircle, CheckCircle, Download, Loader2, Trash } from "lucide-react"
 import Heading from '@tiptap/extension-heading'
 import Code from '@tiptap/extension-code'
-import { jsPDF } from "jspdf";
 
 import { DocumentSelect } from "@/lib/db/types"
 import { Skeleton } from "../ui/skeleton"
 import { saveDocument } from "@/actions/documentActions"
-import { styleMarkdownHTML } from "@/lib/utils"
-import { htmlStyles } from "@/lib/htmlStyles"
 
 interface EditorProps {
   loading: boolean
@@ -79,7 +76,7 @@ export function Editor({ loading, document: documentData, onAddToChat }: EditorP
           ]
           : []),
       ],
-      content: loading ? "Loading..." : documentData?.content || "",
+      content: loading ? "Loading..." : documentData?.content.map((data) => data.line).join("<br />") || "",
       editable: !loading,
       onSelectionUpdate: ({ editor }) => {
         const { from, to } = editor.state.selection
@@ -126,7 +123,13 @@ export function Editor({ loading, document: documentData, onAddToChat }: EditorP
   const handleSave = useCallback(() => {
     startLoadingSave(async () => {
       if (!documentData) return;
-      await saveDocument(documentData.id, editor?.getHTML() || "");
+      await saveDocument(documentData.id, editor?.getJSON().content?.map((data, index) => {
+        console.log(data.content![0].text);
+        return {
+          index,
+          line: data.content![0].text || ""
+        }
+      }) || []);
       setNeedsSave(false);
     })
   }, [documentData, editor]);
@@ -144,23 +147,23 @@ export function Editor({ loading, document: documentData, onAddToChat }: EditorP
   const handleSaveDebounced = useCallback(debounce(handleSave, 1000), [handleSave]);
 
   const handleDownload = useCallback(() => {
-    const pdf = new jsPDF({
-      orientation: "portrait",
-      unit: "mm",
-      format: "a4",
-    });
+    // const pdf = new jsPDF({
+    //   orientation: "portrait",
+    //   unit: "mm",
+    //   format: "a4",
+    // });
 
-    const html = (documentData?.content || "") + ` ${htmlStyles}`;
+    // const html = (documentData?.content || "") + ` ${htmlStyles}`;
 
-    pdf.html(html, {
-      callback: (pdf) => {
-        pdf.save(documentData?.name + ".pdf" || "untitledDocument.pdf");
-      },
-      x: 10,
-      y: 10,
-      width: 190, // A4 width (210mm - margins)
-      windowWidth: 800, // Helps with layout accuracy
-    });
+    // pdf.html(html, {
+    //   callback: (pdf) => {
+    //     pdf.save(documentData?.name + ".pdf" || "untitledDocument.pdf");
+    //   },
+    //   x: 10,
+    //   y: 10,
+    //   width: 190, // A4 width (210mm - margins)
+    //   windowWidth: 800, // Helps with layout accuracy
+    // });
   }, [documentData])
 
   if (!providerRef.current && documentData) {
