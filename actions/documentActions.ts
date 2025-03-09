@@ -41,10 +41,9 @@ export async function uploadDocument(form: FormData) {
 }
 
 export async function createDocument(document: DocumentInsert) {
-    await createDocumentDatabase(document);
-    const {userId, content, ...documentData} = document;
+    const documentData = await createDocumentDatabase(document);
     revalidatePath("/");
-    return documentData as DocumentInfo;
+    return documentData;
 }
 
 export async function saveDocument(documentId: string, content: DocumentContent[]) {

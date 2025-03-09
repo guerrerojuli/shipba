@@ -55,7 +55,7 @@ async function getDocument(documentId: string) {
 }
 
 export async function createDocument(document: DocumentInsert) {
-    const newDocument = await db.insert(documents).values(document);
+    const [newDocument] = await db.insert(documents).values(document).returning();
     invalidateTags([CACHE_TAGS.userFiles(document.userId)]);
     return newDocument;
 }

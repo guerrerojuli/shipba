@@ -7,18 +7,16 @@ import { Input } from "@/components/ui/input"
 import { useUser } from "@clerk/nextjs"
 import { Sidebar, SidebarContent, SidebarHeader, SidebarProvider } from "@/components/ui/sidebar"
 import { createDocument, uploadDocument } from "@/actions/documentActions"
-import { DocumentInfo, DocumentInsert, DocumentSelect } from "@/lib/db/types"
+import { DocumentInsert, DocumentSelect } from "@/lib/db/types"
 import { Skeleton } from "../ui/skeleton"
 import { useRouter } from "next/navigation"
 
 interface DocumentSidebarProps {
-  activeDocument: DocumentInfo | null
-  documents: DocumentInfo[]
+  activeDocument: DocumentSelect | null
+  documents: DocumentSelect[]
   loadingList: boolean
-  onDocumentSelect: (document: DocumentInfo) => void
-  setDocuments: (documents: DocumentInfo[]) => void
-  onAddToContext: (document: DocumentInfo) => void
-  documentContext: DocumentSelect[]
+  onDocumentSelect: (document: DocumentSelect) => void
+  setDocuments: (documents: DocumentSelect[]) => void
 }
 
 export function DocumentSidebar({ 
@@ -26,9 +24,7 @@ export function DocumentSidebar({
   documents, 
   loadingList, 
   onDocumentSelect, 
-  setDocuments,
-  onAddToContext,
-  documentContext
+  setDocuments
 }: DocumentSidebarProps) {
   const { user } = useUser();
   
@@ -48,7 +44,7 @@ export function DocumentSidebar({
         id: crypto.randomUUID(),
         name: "Untitled Document",
         createdBy: user.emailAddresses[0].emailAddress,
-        content: [],
+        content: [{index: 0, line: ""}],
         userId: user?.id,
       }
       const document = await createDocument(newDocument);
@@ -56,25 +52,12 @@ export function DocumentSidebar({
     })
   }, [user, documents])
 
-  const handleUploadDocument = useCallback(async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    startLoadingUpload(async () => {
-      const formData = new FormData(e.target as HTMLFormElement);
-      const document = await uploadDocument(formData);
-      setIsUploadModalOpen(false);
-      setDocuments([...documents, document]);
-    })
-  }, [user, documents])
-
   return (
     <SidebarProvider>
       <Sidebar className="h-full border-r">
-        <SidebarHeader className="flex items-center justify-between p-4">
+      <SidebarHeader className="flex items-center justify-between p-4">
           <h2 className="text-lg font-semibold">Documents</h2>
-          <div className="flex gap-2">
-            <Button variant="ghost" size="icon" onClick={() => setIsUploadModalOpen(true)}>
-              <Upload className="h-4 w-4" />
-            </Button>
+          <div className="flex w-full justify-end absolute mr-4 -mt-1">
             <Button variant="ghost" size="icon" onClick={() => {handleCreateDocument();}}>
               {loadingCreate ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
             </Button>
@@ -109,28 +92,6 @@ export function DocumentSidebar({
         </SidebarContent>
       </Sidebar>
 
-      {isUploadModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg bg-background p-6">
-            <form onSubmit={handleUploadDocument}>
-              <h3 className="mb-4 text-lg font-semibold">Upload Document</h3>
-              <Input
-                name="file"
-                type="file"
-                accept=".pdf"
-              />
-              <div className="mt-4 flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setIsUploadModalOpen(false)}>
-                  Cancel
-                </Button>
-                <Button disabled={loadingUpload}>
-                  {loadingUpload ? <Loader2 className="h-4 w-4 animate-spin" /> : "Upload"}
-                </Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </SidebarProvider>
   )
 }

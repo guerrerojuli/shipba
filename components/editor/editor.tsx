@@ -16,12 +16,10 @@ import { Button } from "@/components/ui/button"
 import { AlertCircle, CheckCircle, Download, Loader2, Trash } from "lucide-react"
 import Heading from '@tiptap/extension-heading'
 import Code from '@tiptap/extension-code'
-import { Margin, usePDF } from "react-to-pdf"
 
 import { DocumentSelect } from "@/lib/db/types"
 import { Skeleton } from "../ui/skeleton"
 import { deleteDocument, renameDocument, saveDocument } from "@/actions/documentActions"
-import { styleMarkdownHTML } from "@/lib/utils"
 
 interface EditorProps {
   loading: boolean
@@ -42,15 +40,6 @@ export function Editor({
   setEditor
 }: EditorProps) {
   const { user } = useUser()
-  const { toPDF, targetRef } = usePDF({
-    filename: documentData?.name || "untitledDocument.pdf",
-    page: {
-      margin: Margin.NONE,
-      format: "letter",
-      orientation: "portrait",
-    },
-    method: "save"
-  });
   const providerRef = useRef<HocuspocusProvider>()
   const [editorReady, setEditorReady] = useState(false)
   const [selectedText, setSelectedText] = useState("")
@@ -196,11 +185,6 @@ export function Editor({
     setShowTransformer(false)
   }
 
-  const handleDownload = () => {
-    console.log(styleMarkdownHTML(editor?.getHTML() || ""))
-    toPDF()
-  }
-
   const handleRename = useCallback(async (newname: string) => {
     startLoadingSave(async () => {
       if (!documentData) return;
@@ -236,10 +220,6 @@ export function Editor({
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={() => handleDownload()}>
-            {loadingDownload ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
-            Download
-          </Button>
           <Button variant="ghost" size="sm" className="text-red-500" onClick={handleDelete}>
             {loadingDelete ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash className="mr-2 h-4 w-4" />}
             Delete
@@ -281,7 +261,6 @@ export function Editor({
         )}
       </div>
     </div>
-    <div ref={targetRef} className="absolute top-[9999px] left-[9999px] p-8" dangerouslySetInnerHTML={{ __html: styleMarkdownHTML(editor?.getHTML() || "") }}></div>
     </>
   )
 }

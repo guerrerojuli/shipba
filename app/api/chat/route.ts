@@ -48,23 +48,15 @@ export async function POST(req: Request) {
     context += selectedText
   }
 
+  console.log("Context:", context)
+
   // Add system message with context
   const systemMessage = `
   You are an AI assistant specialized in document editing, writing, translation, and analysis. You have access to a suggestEdit tool that allows you to suggest edits to the entire document content.
 
-  The context provided will include documents with the following structure:
-  {
-    id: string, 
-    name: string, 
-    content: [{index: number, line: string}], 
-    userId: string,
-    createdAt: Date,
-    createdBy: string
-  }
-
   When suggesting edits:
-  1. Use the suggestEdit tool to provide a new version of the document content.
-  2. The new document content should be provided as an array of objects with the structure {index: number, line: string}.
+  1. Use the suggestEdit tool to provide a complete new version of the document content.
+  2. The new document content should be provided as a single string with line breaks preserved.
   3. Clearly explain your changes after executing suggestEdit.
 
   GUIDELINES:
@@ -76,8 +68,8 @@ export async function POST(req: Request) {
   ${context ? `CONTEXT:\n${context}` : ""}
   
   ALWAYS USE suggestEdit FOR TEXT CHANGES.`;
+  
 
-  console.log("System message:", systemMessage)
 
   // Generate a response
   const response = streamText({

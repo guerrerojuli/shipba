@@ -16,7 +16,7 @@ function EditorContent() {
   const [selectedText, setSelectedText] = useState<string>("")
   const [activeDocument, setActiveDocument] = useState<DocumentSelect | null>(null)
   const [documentContext, setDocumentContext] = useState<DocumentSelect[]>([])
-  const [documents, setDocuments] = useState<DocumentInfo[]>([])
+  const [documents, setDocuments] = useState<DocumentSelect[]>([])
   const [loading, startTransition] = useTransition();
   const [loadingList, startLoadingList] = useTransition();
 
@@ -24,11 +24,21 @@ function EditorContent() {
     const fetchDocuments = async () => {
       startLoadingList(async () => {
         const documents = await getDocumentList();
-        setDocuments(documents);
+        const allDocuments = await Promise.all(documents.map(async (document) => {
+          const documentData = await getDocument(document.id);
+          return documentData;
+        }));
+        setDocuments(allDocuments);
       })
     };
     fetchDocuments();
   }, []);
+
+  const handleAddToContext = useCallback((document: DocumentSelect) => {
+    if (!documentContext.find(doc => doc.id === document.id)) {
+      setDocumentContext([...documentContext, document]);
+    }
+  }, [documentContext]);
 
   const handleDocumentSelect = useCallback(async (document: DocumentInfo) => {
     startTransition(async () => {
@@ -36,15 +46,6 @@ function EditorContent() {
       setActiveDocument(documentData);
     })
   }, [])
-
-  const handleAddToContext = useCallback(async (document: DocumentInfo) => {
-    if (!documentContext.find(doc => doc.id === document.id)) {
-      startTransition(async () => {
-        const documentData = await getDocument(document.id);
-        setDocumentContext([...documentContext, documentData]);
-      });
-    }
-  }, [documentContext]);
 
   const handleRemoveDocumentContext = (documentId: string) => {
     setDocumentContext(documentContext.filter((doc) => doc.id !== documentId))
@@ -55,13 +56,11 @@ function EditorContent() {
       <div className="flex h-full">
         <div>
           <DocumentSidebar 
-            loadingList={loadingList} 
-            documents={documents} 
-            setDocuments={setDocuments} 
-            activeDocument={activeDocument} 
-            onDocumentSelect={handleDocumentSelect}
-            onAddToContext={handleAddToContext}
-            documentContext={documentContext}
+          loadingList={loadingList} 
+          documents={documents} 
+          setDocuments={setDocuments} 
+          activeDocument={activeDocument} 
+          onDocumentSelect={handleDocumentSelect} 
           />
         </div>
         

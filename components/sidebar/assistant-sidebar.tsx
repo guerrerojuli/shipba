@@ -1,6 +1,6 @@
 "use client"
 
-import { KeyboardEvent, useRef, useState } from "react"
+import { KeyboardEvent, useRef, useState, useEffect } from "react"
 import { X, Plus, CornerDownLeft, File } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -18,8 +18,8 @@ interface AssistantSidebarProps {
   activeDocument: DocumentSelect | null
   setActiveDocument: (document: DocumentSelect) => void
   onRemoveSelectedText: () => void
-  documents: DocumentInfo[]
-  onAddToContext: (document: DocumentInfo) => Promise<void>
+  documents: DocumentSelect[]
+  onAddToContext: (document: DocumentSelect) => void
 }
 
 export function AssistantSidebar({
@@ -35,7 +35,7 @@ export function AssistantSidebar({
 }: AssistantSidebarProps) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const { messages, input, handleInputChange, handleSubmit, status } = useChat({
+  const { messages, input, handleInputChange, handleSubmit, status, setMessages } = useChat({
     body: {
       documentContext,
       activeDocument,
@@ -50,6 +50,11 @@ export function AssistantSidebar({
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
 
+  useEffect(() => {
+    setMessages([])
+    documentContext.forEach((doc) => onRemoveDocumentContext(doc.id))
+  }, [activeDocument])
+
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
@@ -63,8 +68,8 @@ export function AssistantSidebar({
     <div className="h-full w-full flex flex-col border-l">
       <div className="flex h-12 items-center justify-between border-b px-4">
         <h2 className="text-lg font-semibold">Assistant</h2>
-        <Button variant="ghost" size="icon">
-          <X className="h-4 w-4" />
+        <Button variant="ghost" size="icon" onClick={() => setMessages([])}>
+          <Plus className="h-4 w-4" />
         </Button>
       </div>
 
@@ -147,7 +152,7 @@ export function AssistantSidebar({
                     if (state === "result") {
                       return <Edit 
                         key={toolCallId} 
-                        suggestion={args.newDocument} 
+                        newDocument={args.newDocument} 
                         activeDocument={activeDocument || { id: "", name: "", content: [], createdAt: new Date(), userId: "", createdBy: "" }} 
                         setActiveDocument={setActiveDocument} 
                         editor={editor}
