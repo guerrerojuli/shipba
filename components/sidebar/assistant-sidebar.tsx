@@ -174,7 +174,7 @@ export function AssistantSidebar({
               </div>
             })}
 
-            {status === "streaming" && (
+            {(status === "streaming" || status === "submitted") && (
               <div className="flex justify-start">
                 <div className="max-w-[80%] rounded-lg bg-muted p-3">
                   <div className="flex space-x-2">
