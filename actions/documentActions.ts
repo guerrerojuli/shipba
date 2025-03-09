@@ -4,7 +4,7 @@ import { DocumentInfo, DocumentInsert } from "@/lib/db/types";
 import { auth } from "@clerk/nextjs";
 import { currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
-import pdfParse from "pdf-parse";
+import { fileToMarkdown } from "./ai";
 
 export async function getDocumentList() {
     const {userId} = auth();
@@ -25,15 +25,14 @@ export async function uploadDocument(form: FormData) {
     if (!file) throw new Error("No file uploaded");
     if (file.type !== "application/pdf") throw new Error("File must be a PDF");
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const pdfContent = await pdfParse(buffer);
+    const markdown = await fileToMarkdown(file);
 
     const document: DocumentInsert = {
         id: crypto.randomUUID(),
         name: file.name,
         createdBy: user.emailAddresses[0].emailAddress,
         userId: user.id,
-        content: pdfContent.text,
+        content: markdown,
     }
     return await createDocument(document);
 }

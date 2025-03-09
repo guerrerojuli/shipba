@@ -38,7 +38,7 @@ export function Editor({ loading, document: documentData, onAddToChat }: EditorP
   const editorRef = useRef<HTMLDivElement>(null)
   const editor = useEditor(
     {
-      immediatelyRender: false,
+      immediatelyRender: true,
       extensions: [
         StarterKit.configure({
           history: false,
@@ -123,7 +123,7 @@ export function Editor({ loading, document: documentData, onAddToChat }: EditorP
   const handleSave = useCallback(() => {
     startLoadingSave(async () => {
       if (!documentData) return;
-      await saveDocument(documentData.id, editor?.getText() || "");
+      await saveDocument(documentData.id, editor?.getHTML() || "");
       setNeedsSave(false);
     })
   }, [documentData, editor]);

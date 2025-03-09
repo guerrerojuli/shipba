@@ -1,7 +1,7 @@
 "use client"
 
 import { FormEvent, startTransition, useCallback, useEffect, useState, useTransition } from "react"
-import { Plus, File, Upload, Loader2 } from "lucide-react"
+import { Plus, File, Upload, Loader2, MoreHorizontal, MoreVertical } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useUser } from "@clerk/nextjs"
@@ -56,7 +56,7 @@ export function DocumentSidebar({ activeDocument, onDocumentSelect }: DocumentSi
       setIsUploadModalOpen(false);
       setDocuments([...documents, document]);
     })
-  }, [user])
+  }, [user, documents])
 
   return (
     <SidebarProvider>
@@ -85,8 +85,17 @@ export function DocumentSidebar({ activeDocument, onDocumentSelect }: DocumentSi
                 className="w-full justify-start"
                 onClick={() => onDocumentSelect(document)}
               >
-                <File className="mr-2 h-4 w-4" />
-                <span className="truncate">{document.name}</span>
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center">
+                    <File className="mr-2 h-4 w-4" />
+                    <span className="truncate">{document.name}</span>
+                  </div>
+                  <MoreVertical className="h-4 w-4" onClick={(e) => {
+                    e.stopPropagation();
+                    // Open dropdown menu
+
+                  }} />
+                </div>
               </Button>
             ))}
           </div>
