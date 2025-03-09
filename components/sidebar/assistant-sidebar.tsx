@@ -3,33 +3,37 @@
 import { KeyboardEvent, useRef } from "react"
 import { X, Plus, CornerDownLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import type { Document } from "@/types/document"
-import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { useChat } from "@ai-sdk/react"
-import { DocumentSelect } from "@/lib/db/types"
+import type { DocumentSelect } from "@/lib/db/types"
+import { Edit } from "../ai/edit"
+import type { Editor as EditorType } from "@tiptap/react"
 
 interface AssistantSidebarProps {
+  editor: EditorType | null
   selectedText: string
   documentContext: DocumentSelect[]
   onRemoveDocumentContext: (documentId: string) => void
   activeDocument: DocumentSelect | null
+  setActiveDocument: (document: DocumentSelect) => void
   onRemoveSelectedText: () => void
 }
 
 export function AssistantSidebar({
+  editor,
   selectedText,
   documentContext,
   onRemoveDocumentContext,
   activeDocument,
+  setActiveDocument,
   onRemoveSelectedText,
 }: AssistantSidebarProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
-
   const { messages, input, handleInputChange, handleSubmit, status } = useChat({
     body: {
       documentContext,
       activeDocument,
+      selectedText,
     },
     onFinish: () => {
       scrollToBottom()
@@ -63,6 +67,7 @@ export function AssistantSidebar({
         <div className="flex flex-wrap gap-2">
           {documentContext.length > 0 ? (
             documentContext.map((doc) => (
+              /*
               <Badge key={doc.id} variant="secondary" className="flex items-center gap-1">
                 {doc.name}
                 <Button
@@ -74,6 +79,8 @@ export function AssistantSidebar({
                   <X className="h-3 w-3" />
                 </Button>
               </Badge>
+              */
+             <div>a</div>
             ))
           ) : (
             <div className="text-sm text-muted-foreground">No context documents added</div>
@@ -87,16 +94,33 @@ export function AssistantSidebar({
       <div className="flex-1 overflow-hidden relative">
         <div className="absolute inset-0 overflow-y-auto p-4">
           <div className="space-y-4">
-            {messages.map((message) => (
-              <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div
-                  className={`max-w-[80%] rounded-lg p-3 ${message.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
-                    }`}
-                >
-                  {message.content}
-                </div>
+            {messages.map((message) => {
+              console.log(message)
+              return <div
+                key={message.id}
+                className={`flex flex-col ${message.role === "user" ? "items-end" : "items-start"}`}
+              >
+                {message.toolInvocations?.map((toolInvocation) => {
+                  const { toolCallId, toolName, state, args } = toolInvocation
+
+                  console.log(toolInvocation)
+
+                  if (toolName === "suggestEdit" && state === "result") {
+                    return <Edit key={toolCallId} suggestion={args.suggestion} activeDocument={activeDocument || {id: "", name: "", content: [], createdAt: new Date(), userId: "", createdBy: ""}} setActiveDocument={setActiveDocument} editor={editor}/>
+                  }
+                })}
+
+                {message.content && (
+                  <div
+                    className={`max-w-[80%] rounded-lg p-3 ${message.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
+                      }`}
+                  >
+                    {message.content}
+                  </div>
+                )}
               </div>
-            ))}
+            })}
+
             {status === "streaming" && (
               <div className="flex justify-start">
                 <div className="max-w-[80%] rounded-lg bg-muted p-3">

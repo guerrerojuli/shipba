@@ -46,7 +46,7 @@ export function DocumentSidebar({ activeDocument, onDocumentSelect }: DocumentSi
         id: crypto.randomUUID(),
         name: "Untitled Document",
         createdBy: user.emailAddresses[0].emailAddress,
-        content: [],
+        content: [{index: 0, line: ""}],
         userId: user?.id,
       }
       const document = await createDocument(newDocument);

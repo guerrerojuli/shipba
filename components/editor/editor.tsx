@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useRef, useTransition, useCallback } from "react"
+import { useState, useRef, useTransition, useCallback, useEffect } from "react"
+import type { Editor as EditorType } from "@tiptap/react"
 import { useEditor, EditorContent } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 import Placeholder from "@tiptap/extension-placeholder"
@@ -24,9 +25,18 @@ interface EditorProps {
   loading: boolean
   document: DocumentSelect | null
   onAddToChat: (text: string) => void
+  onDocumentUpdate: (document: DocumentSelect) => void
+  setEditor: (editor: EditorType) => void
 }
 
-export function Editor({ loading, document: documentData, onAddToChat }: EditorProps) {
+
+export function Editor({ 
+  loading,
+  document: documentData, 
+  onAddToChat,
+  onDocumentUpdate,
+  setEditor
+}: EditorProps) {
   const { user } = useUser()
   const providerRef = useRef<HocuspocusProvider>()
   const [editorReady, setEditorReady] = useState(false)
@@ -123,7 +133,8 @@ export function Editor({ loading, document: documentData, onAddToChat }: EditorP
   const handleSave = useCallback(() => {
     startLoadingSave(async () => {
       if (!documentData) return;
-      await saveDocument(documentData.id, editor?.getJSON().content?.map((data, index) => {
+      await saveDocument(documentData.id, editor?.getJSON().content?.filter(data => data.content).map((data, index) => {
+        console.log(data.content);
         console.log(data.content![0].text);
         return {
           index,
@@ -165,6 +176,12 @@ export function Editor({ loading, document: documentData, onAddToChat }: EditorP
     //   windowWidth: 800, // Helps with layout accuracy
     // });
   }, [documentData])
+
+  useEffect(() => {
+    if (editor) {
+      setEditor(editor)
+    }
+  }, [editor])
 
   if (!providerRef.current && documentData) {
     try {
