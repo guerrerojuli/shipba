@@ -27,7 +27,6 @@ export function DocumentSidebar({
   setDocuments
 }: DocumentSidebarProps) {
   const { user } = useUser();
-  
   const [loadingCreate, startLoadingCreate] = useTransition();
   const [loadingUpload, startLoadingUpload] = useTransition();
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
@@ -52,12 +51,25 @@ export function DocumentSidebar({
     })
   }, [user, documents])
 
+  const handleUploadDocument = useCallback(async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    startLoadingUpload(async () => {
+      const formData = new FormData(e.target as HTMLFormElement);
+      const document = await uploadDocument(formData);
+      setIsUploadModalOpen(false);
+      setDocuments([...documents, document]);
+    })
+  }, [user, documents])
+
   return (
     <SidebarProvider>
       <Sidebar className="h-full border-r">
-      <SidebarHeader className="flex items-center justify-between p-4">
+        <SidebarHeader className="flex items-center justify-between p-4">
           <h2 className="text-lg font-semibold">Documents</h2>
-          <div className="flex w-full justify-end absolute mr-4 -mt-1">
+          <div className="flex gap-2">
+            <Button variant="ghost" size="icon" onClick={() => setIsUploadModalOpen(true)}>
+              <Upload className="h-4 w-4" />
+            </Button>
             <Button variant="ghost" size="icon" onClick={() => {handleCreateDocument();}}>
               {loadingCreate ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
             </Button>
@@ -91,7 +103,28 @@ export function DocumentSidebar({
           </div>
         </SidebarContent>
       </Sidebar>
-
+      {isUploadModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md rounded-lg bg-background p-6">
+            <form onSubmit={handleUploadDocument}>
+              <h3 className="mb-4 text-lg font-semibold">Upload Document</h3>
+              <Input
+                name="file"
+                type="file"
+                accept=".pdf"
+              />
+              <div className="mt-4 flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setIsUploadModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button disabled={loadingUpload}>
+                  {loadingUpload ? <Loader2 className="h-4 w-4 animate-spin" /> : "Upload"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </SidebarProvider>
   )
 }
