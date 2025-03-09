@@ -56,16 +56,23 @@ async function getDocument(documentId: string) {
 
 export async function createDocument(document: DocumentInsert) {
     const newDocument = await db.insert(documents).values(document);
-    revalidateTag(CACHE_TAGS.userFiles(document.userId));
+    invalidateTags([CACHE_TAGS.userFiles(document.userId)]);
     return newDocument;
 }
 
 export async function updateDocument(documentId: string, document: DocumentUpdate) {
-    return db.update(documents).set(document).where(eq(documents.id, documentId));
+    const updatedDocument = await db.update(documents).set(document).where(eq(documents.id, documentId)).returning();
+    invalidateTags([
+        CACHE_TAGS.file(documentId),
+        CACHE_TAGS.userFiles(updatedDocument[0].userId)
+    ]);
+    return updatedDocument[0];
 }
 
 export async function deleteDocument(documentId: string) {
     const document = await db.delete(documents).where(eq(documents.id, documentId)).returning();
-    revalidateTag(CACHE_TAGS.userFiles(document[0].userId));
-    revalidateTag(CACHE_TAGS.file(documentId));
+    invalidateTags([
+        CACHE_TAGS.userFiles(document[0].userId),
+        CACHE_TAGS.file(documentId)
+    ]);
 }

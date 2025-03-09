@@ -16,16 +16,19 @@ import { Button } from "@/components/ui/button"
 import { AlertCircle, CheckCircle, Download, Loader2, Trash } from "lucide-react"
 import Heading from '@tiptap/extension-heading'
 import Code from '@tiptap/extension-code'
+import { Margin, usePDF } from "react-to-pdf"
 
 import { DocumentSelect } from "@/lib/db/types"
 import { Skeleton } from "../ui/skeleton"
-import { saveDocument } from "@/actions/documentActions"
+import { deleteDocument, renameDocument, saveDocument } from "@/actions/documentActions"
+import { styleMarkdownHTML } from "@/lib/utils"
 
 interface EditorProps {
   loading: boolean
   document: DocumentSelect | null
   onAddToChat: (text: string) => void
   onDocumentUpdate: (document: DocumentSelect) => void
+  onDocumentDelete: (document: DocumentSelect) => void
   setEditor: (editor: EditorType) => void
 }
 
@@ -35,17 +38,32 @@ export function Editor({
   document: documentData, 
   onAddToChat,
   onDocumentUpdate,
+  onDocumentDelete,
   setEditor
 }: EditorProps) {
   const { user } = useUser()
+  const { toPDF, targetRef } = usePDF({
+    filename: documentData?.name || "untitledDocument.pdf",
+    page: {
+      margin: Margin.NONE,
+      format: "letter",
+      orientation: "portrait",
+    },
+    method: "save"
+  });
   const providerRef = useRef<HocuspocusProvider>()
   const [editorReady, setEditorReady] = useState(false)
   const [selectedText, setSelectedText] = useState("")
   const [transformerPosition, setTransformerPosition] = useState<{ x: number; y: number } | null>(null)
   const [showTransformer, setShowTransformer] = useState(false)
+  const [editingName, setEditingName] = useState(false);
+  const [newName, setNewName] = useState(documentData?.name || "Untitled Document");
   const [loadingSave, startLoadingSave] = useTransition();
+  const [loadingDelete, startLoadingDelete] = useTransition();
+  const [loadingDownload, startLoadingDownload] = useTransition();
   const [needsSave, setNeedsSave] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null)
+  const editNameRef = useRef<HTMLInputElement>(null)
   const editor = useEditor(
     {
       immediatelyRender: true,
@@ -133,12 +151,10 @@ export function Editor({
   const handleSave = useCallback(() => {
     startLoadingSave(async () => {
       if (!documentData) return;
-      await saveDocument(documentData.id, editor?.getJSON().content?.filter(data => data.content).map((data, index) => {
-        console.log(data.content);
-        console.log(data.content![0].text);
+      await saveDocument(documentData.id, editor?.getHTML().split("\n").map((line, index) => {
         return {
           index,
-          line: data.content![0].text || ""
+          line: line || ""
         }
       }) || []);
       setNeedsSave(false);
@@ -157,24 +173,12 @@ export function Editor({
 
   const handleSaveDebounced = useCallback(debounce(handleSave, 1000), [handleSave]);
 
-  const handleDownload = useCallback(() => {
-    // const pdf = new jsPDF({
-    //   orientation: "portrait",
-    //   unit: "mm",
-    //   format: "a4",
-    // });
-
-    // const html = (documentData?.content || "") + ` ${htmlStyles}`;
-
-    // pdf.html(html, {
-    //   callback: (pdf) => {
-    //     pdf.save(documentData?.name + ".pdf" || "untitledDocument.pdf");
-    //   },
-    //   x: 10,
-    //   y: 10,
-    //   width: 190, // A4 width (210mm - margins)
-    //   windowWidth: 800, // Helps with layout accuracy
-    // });
+  const handleDelete = useCallback(() => {
+    startLoadingDelete(async () => {
+      if (!documentData) return;
+      deleteDocument(documentData.id);
+      onDocumentDelete(documentData);
+    })
   }, [documentData])
 
   useEffect(() => {
@@ -211,13 +215,36 @@ export function Editor({
     setShowTransformer(false)
   }
 
+  const handleDownload = () => {
+    console.log(styleMarkdownHTML(editor?.getHTML() || ""))
+    toPDF()
+  }
+
+  const handleRename = useCallback(async (newname: string) => {
+    startLoadingSave(async () => {
+      if (!documentData) return;
+      await renameDocument(documentData.id, newname);
+      setEditingName(false)
+      onDocumentUpdate({...documentData, name: newname})
+    })
+  }, [documentData, setEditingName])
+
   return (
+    <>
     <div className="flex h-full w-full flex-col overflow-hidden">
       <div className="flex items-center justify-between border-b p-2">
         <div className="flex items-center gap-2">
           {loading ? 
             <Skeleton className="h-8 w-32" /> : 
-            <h1 className="ml-2 text-xl font-semibold">{documentData?.name || "Untitled Document"}</h1>
+            !editingName ? 
+              <h1 className="ml-2 text-xl font-semibold" onClick={() => {setEditingName(true)}}>{newName}</h1> :
+              <form onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
+                e.preventDefault()
+                handleRename(newName)
+                editNameRef.current?.blur()
+              }}>
+                <input ref={editNameRef} autoFocus type="text" name="newname" className="ml-2 text-xl font-semibold" value={newName} onChange={(e) => {setNewName(e.target.value)}} onBlur={(e) => {handleRename(newName)}} />
+              </form>
           }
           <p className="flex items-center gap-1">
             {loadingSave ? 
@@ -228,12 +255,12 @@ export function Editor({
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={handleDownload}>
-            <Download className="mr-2 h-4 w-4" />
+          <Button variant="ghost" size="sm" onClick={() => handleDownload()}>
+            {loadingDownload ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
             Download
           </Button>
-          <Button variant="ghost" size="sm" className="text-red-500">
-            <Trash className="mr-2 h-4 w-4" />
+          <Button variant="ghost" size="sm" className="text-red-500" onClick={handleDelete}>
+            {loadingDelete ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash className="mr-2 h-4 w-4" />}
             Delete
           </Button>
         </div>
@@ -262,5 +289,7 @@ export function Editor({
         )}
       </div>
     </div>
+    <div ref={targetRef} className="absolute top-[9999px] left-[9999px] p-8" dangerouslySetInnerHTML={{ __html: styleMarkdownHTML(editor?.getHTML() || "") }}></div>
+    </>
   )
 }

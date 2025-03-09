@@ -1,39 +1,31 @@
 "use client"
 
-import { FormEvent, startTransition, useCallback, useEffect, useState, useTransition } from "react"
-import { Plus, File, Upload, Loader2, MoreHorizontal, MoreVertical } from "lucide-react"
+import { FormEvent, useCallback, useState, useTransition } from "react"
+import { Plus, File, Upload, Loader2, MoreVertical } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useUser } from "@clerk/nextjs"
 import { Sidebar, SidebarContent, SidebarHeader, SidebarProvider } from "@/components/ui/sidebar"
-import { createDocument, getDocumentList, uploadDocument } from "@/actions/documentActions"
+import { createDocument, uploadDocument } from "@/actions/documentActions"
 import { DocumentInfo, DocumentInsert } from "@/lib/db/types"
 import { Skeleton } from "../ui/skeleton"
 import { useRouter } from "next/navigation"
 
 interface DocumentSidebarProps {
   activeDocument: DocumentInfo | null
+  documents: DocumentInfo[]
+  loadingList: boolean
   onDocumentSelect: (document: DocumentInfo) => void
+  setDocuments: (documents: DocumentInfo[]) => void
 }
 
-export function DocumentSidebar({ activeDocument, onDocumentSelect }: DocumentSidebarProps) {
+export function DocumentSidebar({ activeDocument, documents, loadingList, onDocumentSelect, setDocuments }: DocumentSidebarProps) {
   const { user } = useUser();
-  const [loadingList, startLoadingList] = useTransition();
+  
   const [loadingCreate, startLoadingCreate] = useTransition();
   const [loadingUpload, startLoadingUpload] = useTransition();
-  const [documents, setDocuments] = useState<DocumentInfo[]>([])
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
   const router = useRouter();
-
-  useEffect(() => {
-    const fetchDocuments = async () => {
-      startLoadingList(async () => {
-        const documents = await getDocumentList();
-        setDocuments(documents);
-      })
-    };
-    fetchDocuments();
-  }, []);
 
   const handleCreateDocument = useCallback(async () => {
     if(documents.length >= 1 && localStorage.getItem("userSubscription") !== "pro") {

@@ -9,14 +9,26 @@ import { Editor } from "@/components/editor/editor"
 import { AssistantSidebar } from "@/components/sidebar/assistant-sidebar"
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable"
 import { DocumentInfo, DocumentSelect } from "@/lib/db/types"
-import { getDocument } from "@/actions/documentActions"
+import { getDocument, getDocumentList } from "@/actions/documentActions"
 
 function EditorContent() {
   const [editor, setEditor] = useState<EditorType | null>(null)
   const [selectedText, setSelectedText] = useState<string>("")
   const [activeDocument, setActiveDocument] = useState<DocumentSelect | null>(null)
   const [documentContext, setDocumentContext] = useState<DocumentSelect[]>([])
+  const [documents, setDocuments] = useState<DocumentInfo[]>([])
   const [loading, startTransition] = useTransition();
+  const [loadingList, startLoadingList] = useTransition();
+
+  useEffect(() => {
+    const fetchDocuments = async () => {
+      startLoadingList(async () => {
+        const documents = await getDocumentList();
+        setDocuments(documents);
+      })
+    };
+    fetchDocuments();
+  }, []);
 
   const handleDocumentSelect = useCallback(async (document: DocumentInfo) => {
     startTransition(async () => {
@@ -33,8 +45,8 @@ function EditorContent() {
     <div className="h-screen w-full overflow-hidden">
       <div className="flex h-full">
         <div>
-        <DocumentSidebar activeDocument={activeDocument} onDocumentSelect={handleDocumentSelect} />
-          </div>
+          <DocumentSidebar loadingList={loadingList} documents={documents} setDocuments={setDocuments} activeDocument={activeDocument} onDocumentSelect={handleDocumentSelect} />
+        </div>
         
         
         <ResizablePanelGroup direction="horizontal" className="flex-1 h-full">
@@ -44,7 +56,13 @@ function EditorContent() {
                 loading={loading}
                 document={activeDocument}
                 onAddToChat={setSelectedText}
-                onDocumentUpdate={setActiveDocument}
+                onDocumentUpdate={(document) => {
+                  setDocuments(documents.map((doc) => doc.id === document.id ? document : doc))
+                }}
+                onDocumentDelete={(document) => {
+                  setDocuments(documents.filter((doc) => doc.id !== document.id));
+                  setActiveDocument(null);
+                }}
                 setEditor={setEditor}
               />
             ) : (

@@ -24,7 +24,7 @@ export function styleMarkdownHTML(htmlString: string) {
     };
 
     if (typeof window === 'undefined') {
-        return { html: htmlString, scrollWidth: 0 }; // Retornar sin modificar si estamos en el servidor
+        return htmlString; // Retornar sin modificar si estamos en el servidor
     }
 
     const parser = new DOMParser();
@@ -38,5 +38,5 @@ export function styleMarkdownHTML(htmlString: string) {
         }
     });
 
-    return { html: doc.documentElement.outerHTML, scrollWidth: doc.documentElement.scrollWidth };
+    return doc.documentElement.getElementsByTagName("body")[0].innerHTML;
 }

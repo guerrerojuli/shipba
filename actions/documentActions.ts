@@ -52,8 +52,12 @@ export async function saveDocument(documentId: string, content: DocumentContent[
     revalidatePath("/");
 }
 
+export async function renameDocument(documentId: string, name: string) {
+    await updateDocument(documentId, { name });
+    revalidatePath("/");
+}
+
 export async function deleteDocument(documentId: string) {
     await deleteDocumentDatabase(documentId);
     revalidatePath("/");
 }
-
