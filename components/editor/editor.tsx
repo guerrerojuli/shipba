@@ -16,7 +16,6 @@ import { Button } from "@/components/ui/button"
 import { AlertCircle, CheckCircle, Download, Loader2, Trash } from "lucide-react"
 import Heading from '@tiptap/extension-heading'
 import Code from '@tiptap/extension-code'
-import { marked } from "marked"
 import { DocumentSelect } from "@/lib/db/types"
 import { Skeleton } from "../ui/skeleton"
 import { deleteDocument, renameDocument, saveDocument } from "@/actions/documentActions"
