@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button"
 import { AlertCircle, CheckCircle, Download, Loader2, Trash } from "lucide-react"
 import Heading from '@tiptap/extension-heading'
 import Code from '@tiptap/extension-code'
-
+import { marked } from "marked"
 import { DocumentSelect } from "@/lib/db/types"
 import { Skeleton } from "../ui/skeleton"
 import { deleteDocument, renameDocument, saveDocument } from "@/actions/documentActions"
@@ -250,7 +250,7 @@ export function Editor({
                 if (i > 0) {
                   editor.chain().focus().insertContentAt(pos, "\n").run()
                 }
-                editor.chain().focus().insertContentAt(pos, line).run()
+                editor.chain().focus().insertContentAt(pos, async () => await marked(line)).run()
               })
             }}
             onAddToChat={handleAddToChat}
