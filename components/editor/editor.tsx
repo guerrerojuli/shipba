@@ -12,13 +12,16 @@ import { EditorToolbar } from "./editor-toolbar"
 import { TransformerTool } from "./transformer-tool"
 import { useUser } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
-import { AlertCircle, Check, CheckCircle, Loader2, MessageSquare, Plus } from "lucide-react"
+import { AlertCircle, Check, CheckCircle, Delete, Download, Loader2, MessageSquare, Plus, Trash } from "lucide-react"
 import Heading from '@tiptap/extension-heading'
 import Code from '@tiptap/extension-code'
+import { jsPDF } from "jspdf";
 
 import { DocumentSelect } from "@/lib/db/types"
 import { Skeleton } from "../ui/skeleton"
 import { saveDocument } from "@/actions/documentActions"
+import { styleMarkdownHTML } from "@/lib/utils"
+import { htmlStyles } from "@/lib/htmlStyles"
 
 interface EditorProps {
   loading: boolean
@@ -140,6 +143,26 @@ export function Editor({ loading, document: documentData, onAddToChat }: EditorP
 
   const handleSaveDebounced = useCallback(debounce(handleSave, 1000), [handleSave]);
 
+  const handleDownload = useCallback(() => {
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+
+    const html = (documentData?.content || "") + ` ${htmlStyles}`;
+
+    pdf.html(html, {
+      callback: (pdf) => {
+        pdf.save(documentData?.name + ".pdf" || "untitledDocument.pdf");
+      },
+      x: 10,
+      y: 10,
+      width: 190, // A4 width (210mm - margins)
+      windowWidth: 800, // Helps with layout accuracy
+    });
+  }, [documentData])
+
   if (!providerRef.current && documentData) {
     try {
       providerRef.current = new HocuspocusProvider({
@@ -185,16 +208,13 @@ export function Editor({ loading, document: documentData, onAddToChat }: EditorP
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm">
-            <MessageSquare className="mr-2 h-4 w-4" />
-            Chat
+          <Button variant="ghost" size="sm" onClick={handleDownload}>
+            <Download className="mr-2 h-4 w-4" />
+            Download
           </Button>
-          <Button variant="ghost" size="sm">
-            <Plus className="mr-2 h-4 w-4" />
-            Research
-          </Button>
-          <Button variant="ghost" size="sm">
-            Copy
+          <Button variant="ghost" size="sm" className="text-red-500">
+            <Trash className="mr-2 h-4 w-4" />
+            Delete
           </Button>
         </div>
       </div>
