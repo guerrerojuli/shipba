@@ -3,25 +3,29 @@
 import { KeyboardEvent, useRef } from "react"
 import { X, Plus, CornerDownLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 import { useChat } from "@ai-sdk/react"
 import type { DocumentSelect } from "@/lib/db/types"
 import { Edit } from "../ai/edit"
+import type { Editor as EditorType } from "@tiptap/react"
 
 interface AssistantSidebarProps {
+  editor: EditorType | null
   selectedText: string
   documentContext: DocumentSelect[]
   onRemoveDocumentContext: (documentId: string) => void
   activeDocument: DocumentSelect | null
+  setActiveDocument: (document: DocumentSelect) => void
   onRemoveSelectedText: () => void
 }
 
 export function AssistantSidebar({
+  editor,
   selectedText,
   documentContext,
   onRemoveDocumentContext,
   activeDocument,
+  setActiveDocument,
   onRemoveSelectedText,
 }: AssistantSidebarProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -94,7 +98,7 @@ export function AssistantSidebar({
               console.log(message)
               return <div
                 key={message.id}
-                className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                className={`flex flex-col ${message.role === "user" ? "items-end" : "items-start"}`}
               >
                 {message.toolInvocations?.map((toolInvocation) => {
                   const { toolCallId, toolName, state, args } = toolInvocation
@@ -102,7 +106,7 @@ export function AssistantSidebar({
                   console.log(toolInvocation)
 
                   if (toolName === "suggestEdit" && state === "result") {
-                    return <Edit key={toolCallId} suggestion={args.suggestion} />
+                    return <Edit key={toolCallId} suggestion={args.suggestion} activeDocument={activeDocument || {id: "", name: "", content: [], createdAt: new Date(), userId: "", createdBy: ""}} setActiveDocument={setActiveDocument} editor={editor}/>
                   }
                 })}
 

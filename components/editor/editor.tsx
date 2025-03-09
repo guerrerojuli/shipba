@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
+import type { Editor as EditorType } from "@tiptap/react"
 import { useEditor, EditorContent } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 import Placeholder from "@tiptap/extension-placeholder"
@@ -23,9 +24,18 @@ interface EditorProps {
   loading: boolean
   document: DocumentSelect | null
   onAddToChat: (text: string) => void
+  onDocumentUpdate: (document: DocumentSelect) => void
+  setEditor: (editor: EditorType) => void
 }
 
-export function Editor({ loading, document: documentData, onAddToChat }: EditorProps) {
+
+export function Editor({ 
+  loading,
+  document: documentData, 
+  onAddToChat,
+  onDocumentUpdate,
+  setEditor
+}: EditorProps) {
   const { user } = useUser()
   const providerRef = useRef<HocuspocusProvider>()
   const [editorReady, setEditorReady] = useState(false)
@@ -112,6 +122,12 @@ export function Editor({ loading, document: documentData, onAddToChat }: EditorP
     },
     [editorReady, documentData, loading]
   )
+
+  useEffect(() => {
+    if (editor) {
+      setEditor(editor)
+    }
+  }, [editor])
 
 
   if (!providerRef.current && documentData) {
