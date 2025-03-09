@@ -4,7 +4,7 @@ import { unstable_cache as nextCache, revalidateTag } from 'next/cache';
 import { documents } from "./schema";
 import { eq } from "drizzle-orm";
 import { db } from "./db";
-import { DocumentInsert } from "./types";
+import { DocumentInsert, DocumentUpdate } from "./types";
 
 const CACHE_TAGS = {
     file: (fileId: string) => `file-${fileId}` as const,
@@ -60,7 +60,7 @@ export async function createDocument(document: DocumentInsert) {
     return newDocument;
 }
 
-export async function updateDocument(documentId: string, document: DocumentInsert) {
+export async function updateDocument(documentId: string, document: DocumentUpdate) {
     return db.update(documents).set(document).where(eq(documents.id, documentId));
 }
 
