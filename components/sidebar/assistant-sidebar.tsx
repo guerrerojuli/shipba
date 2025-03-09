@@ -1,7 +1,7 @@
 "use client"
 
 import { KeyboardEvent, useRef, useState, useEffect } from "react"
-import { X, Plus, CornerDownLeft, File } from "lucide-react"
+import { X, Plus, CornerDownLeft, File, RefreshCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useChat } from "@ai-sdk/react"
@@ -35,7 +35,7 @@ export function AssistantSidebar({
 }: AssistantSidebarProps) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const { messages, input, handleInputChange, handleSubmit, status, setMessages } = useChat({
+  const { messages, input, handleInputChange, handleSubmit, status, setMessages, error, reload } = useChat({
     body: {
       documentContext,
       activeDocument,
@@ -150,11 +150,11 @@ export function AssistantSidebar({
 
                   if (toolName === "suggestEdit") {
                     if (state === "result") {
-                      return <Edit 
-                        key={toolCallId} 
-                        newDocument={args.newDocument} 
-                        activeDocument={activeDocument || { id: "", name: "", content: [], createdAt: new Date(), userId: "", createdBy: "" }} 
-                        setActiveDocument={setActiveDocument} 
+                      return <Edit
+                        key={toolCallId}
+                        newDocument={args.newDocument}
+                        activeDocument={activeDocument || { id: "", name: "", content: [], createdAt: new Date(), userId: "", createdBy: "" }}
+                        setActiveDocument={setActiveDocument}
                         editor={editor}
                       />
                     }
@@ -164,8 +164,8 @@ export function AssistantSidebar({
                 {message.content && (
                   <div
                     className={`rounded-lg p-3 ${message.role === "user"
-                        ? "bg-primary text-primary-foreground max-w-[80%]"
-                        : "text-black-600 max-w-[100%]"
+                      ? "bg-primary text-primary-foreground max-w-[80%]"
+                      : "text-black-600 max-w-[100%]"
                       }`}
                   >
                     {message.content}
@@ -174,23 +174,21 @@ export function AssistantSidebar({
               </div>
             })}
 
-            {(status === "streaming" || status === "submitted") && (
-              <div className="flex justify-start">
-                <div className="max-w-[80%] rounded-lg bg-muted p-3">
-                  <div className="flex space-x-2">
-                    <div className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground"></div>
-                    <div
-                      className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground"
-                      style={{ animationDelay: "0.2s" }}
-                    ></div>
-                    <div
-                      className="h-2 w-2 animate-bounce rounded-full bg-muted-foreground"
-                      style={{ animationDelay: "0.4s" }}
-                    ></div>
-                  </div>
-                </div>
+            {status === "streaming" && (
+              <Loading bgColor="bg-muted-foreground" />
+            )}
+
+            {status === "submitted" && (
+              <Loading bgColor="bg-green-100" />
+            )}
+
+            {error && (
+              <div className="text-red-500 flex items-center gap-2">
+                {error.message}
+                <Button variant="ghost" size="icon" onClick={() => reload()}> <RefreshCcw className="h-4 w-4" /> </Button>
               </div>
             )}
+
             <div ref={messagesEndRef} />
           </div>
         </div>
@@ -226,5 +224,27 @@ export function AssistantSidebar({
         </div>
       </form>
     </div>
+  )
+}
+
+
+function Loading({ bgColor }: { bgColor: string }) {
+  return (
+    <div className="flex justify-start">
+      <div className={`max-w-[80%] rounded-lg p-3 ${bgColor}`}>
+        <div className="flex space-x-2">
+          <div className={`h-2 w-2 animate-bounce rounded-full bg-black/20`}></div>
+          <div
+            className={`h-2 w-2 animate-bounce rounded-full bg-black/20`}
+            style={{ animationDelay: "0.2s" }}
+          ></div>
+          <div
+            className={`h-2 w-2 animate-bounce rounded-full bg-black/20`}
+            style={{ animationDelay: "0.4s" }}
+          ></div>
+        </div>
+      </div>
+    </div>
+
   )
 }
