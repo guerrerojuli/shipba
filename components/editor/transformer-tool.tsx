@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import type { Document as AppDocument } from "@/types/document"
+import type { DocumentSelect } from "@/lib/db/types"
 
 interface TransformerToolProps {
   position: { x: number; y: number }
@@ -20,7 +20,7 @@ interface TransformerToolProps {
   setText: (text: string) => void
   onAddToChat: () => void
   onClose: () => void
-  activeDocument: AppDocument | null
+  activeDocument: DocumentSelect | null
 }
 
 const presets = [
