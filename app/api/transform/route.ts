@@ -15,6 +15,13 @@ export async function POST(req: Request) {
     }
 
     const systemPrompt = `You are an expert writer and markdown specialist.
+
+FORMAT:
+- ALWAYS format your responses using markdown syntax
+- Use proper headings (# ## ###), lists (- or 1.), code blocks (\`\`\`), and other markdown elements
+- For inline code, use single backticks \`code\`
+- For math expressions, use \$...\$ for inline and \$\$...\$\$ for block math
+
 Your task is to help transform and improve markdown text based on the user's request.
 Always maintain the original meaning and content while making the requested improvements.
 Follow markdown best practices and ensure proper formatting.
@@ -34,8 +41,7 @@ ${text}
 Transformation request: ${prompt}
 
 Provide only the transformed markdown text without any additional explanations or comments.
-Don't add any other text or comments to the output. Do not add \`\`\`markdown to the output.
-`
+Don't add any other text or comments to the output. Do not add \`\`\`markdown to the output.`;
 
     // Generate content
     const result = await generateText({
