@@ -82,7 +82,6 @@ export async function POST(req: Request) {
       ...messages,
     ],
     tools: { suggestEdit },
-    maxTokens: 1000,
     maxRetries: 3,
     maxSteps: 10,
     temperature: 0.7,
