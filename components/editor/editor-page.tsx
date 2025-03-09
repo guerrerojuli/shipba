@@ -10,6 +10,7 @@ import { AssistantSidebar } from "@/components/sidebar/assistant-sidebar"
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable"
 import { DocumentInfo, DocumentSelect } from "@/lib/db/types"
 import { getDocument, getDocumentList } from "@/actions/documentActions"
+import { Skeleton } from "../ui/skeleton"
 
 function EditorContent() {
   const [editor, setEditor] = useState<EditorType | null>(null)
@@ -149,7 +150,60 @@ export default function EditorPage() {
   }, [user, isLoaded, router])
 
   if (!isLoaded) {
-    return <div>Cargando...</div>
+    return (
+      <div className="h-screen flex flex-col">
+        <div className="h-12 border-b flex items-center px-4">
+          <Skeleton className="h-6 w-40" />
+        </div>
+        <div className="flex-1 flex">
+          {/* Sidebar izquierdo */}
+          <div className="w-64 border-r">
+            <div className="h-12 border-b px-4 flex items-center justify-between">
+              <Skeleton className="h-6 w-24" />
+              <div className="flex gap-2">
+                <Skeleton className="h-8 w-8 rounded-md" />
+                <Skeleton className="h-8 w-8 rounded-md" />
+              </div>
+            </div>
+            <div className="p-4 space-y-2">
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-8 w-full" />
+            </div>
+          </div>
+          
+          {/* Editor central */}
+          <div className="flex-1 flex flex-col">
+            <div className="h-12 border-b flex items-center px-4">
+              <Skeleton className="h-6 w-64" />
+            </div>
+            <div className="flex-1 p-4">
+              <Skeleton className="h-8 w-3/4 mb-4" />
+              <Skeleton className="h-4 w-full mb-2" />
+              <Skeleton className="h-4 w-full mb-2" />
+              <Skeleton className="h-4 w-2/3 mb-6" />
+              <Skeleton className="h-4 w-full mb-2" />
+              <Skeleton className="h-4 w-4/5 mb-2" />
+              <Skeleton className="h-4 w-full mb-2" />
+            </div>
+          </div>
+          
+          {/* Sidebar derecho */}
+          <div className="w-72 border-l">
+            <div className="h-12 border-b px-4 flex items-center justify-between">
+              <Skeleton className="h-6 w-24" />
+              <Skeleton className="h-8 w-8 rounded-md" />
+            </div>
+            <div className="p-4 space-y-3">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-20 w-full rounded-md" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-4 w-full" />
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   if (!user) {
