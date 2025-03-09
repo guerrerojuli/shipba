@@ -148,6 +148,10 @@ export function Editor({
     [editorReady, documentData, loading]
   )
 
+  useEffect(() => {
+    setNewName(documentData?.name || "Untitled Document")
+  }, [documentData])
+
   const handleSave = useCallback(() => {
     startLoadingSave(async () => {
       if (!documentData) return;
