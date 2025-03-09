@@ -191,29 +191,6 @@ export function Editor({
     }
   }, [editor])
 
-  if (!providerRef.current && documentData) {
-    try {
-      providerRef.current = new HocuspocusProvider({
-        url: 'ws://127.0.0.1:1234',
-        name: `document-${documentData.id}`,
-        token: 'development-token',
-        onConnect: () => {
-          console.log(`Conexión establecida con Hocuspocus. Document id: ${documentData?.id}`)
-          setEditorReady(true)
-        },
-        onDisconnect: () => {
-          console.log('Desconectado de Hocuspocus')
-        },
-        onClose: (data: any) => {
-          console.error('Error de Hocuspocus:', data)
-        }
-      })
-    } catch (error) {
-      console.error("Error al inicializar Hocuspocus:", error)
-      setEditorReady(true)
-    }
-  }
-
   const handleAddToChat = () => {
     onAddToChat(selectedText)
     setShowTransformer(false)
