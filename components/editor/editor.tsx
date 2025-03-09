@@ -53,6 +53,11 @@ export function Editor({
   const [needsSave, setNeedsSave] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null)
   const editNameRef = useRef<HTMLInputElement>(null)
+
+  const truncateText = (text: string, maxLength: number = 40) => {
+    return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
+  }
+
   const editor = useEditor(
     {
       immediatelyRender: true,
@@ -203,7 +208,7 @@ export function Editor({
           {loading ? 
             <Skeleton className="h-8 w-32" /> : 
             !editingName ? 
-              <h1 className="ml-2 text-xl font-semibold" onClick={() => {setEditingName(true)}}>{newName}</h1> :
+              <h1 className="ml-2 text-xl font-semibold" onClick={() => {setEditingName(true)}}>{truncateText(newName)}</h1> :
               <form onSubmit={(e: React.FormEvent<HTMLFormElement>) => {
                 e.preventDefault()
                 handleRename(newName)

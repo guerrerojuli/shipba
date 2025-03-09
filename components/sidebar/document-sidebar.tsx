@@ -32,6 +32,10 @@ export function DocumentSidebar({
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
   const router = useRouter();
 
+  const truncateText = (text: string, maxLength: number = 20) => {
+    return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
+  }
+
   const handleCreateDocument = useCallback(async () => {
     if(documents.length >= 2 && localStorage.getItem("userSubscription") !== "pro") {
       router.push("/pricing")
@@ -91,7 +95,7 @@ export function DocumentSidebar({
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center">
                     <File className="mr-2 h-4 w-4" />
-                    <span className="truncate">{document.name}</span>
+                    <span className="truncate">{truncateText(document.name)}</span>
                   </div>
                   <MoreVertical className="h-4 w-4" onClick={(e) => {
                     e.stopPropagation();

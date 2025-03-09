@@ -22,7 +22,7 @@ export function Edit(
             <button
                 onClick={async () => {
                     if (!editor) return;
-                    editor.commands.setContent(newDocument);
+                    editor.commands.setContent(await marked(newDocument));
                     await saveDocument(activeDocument.id, editor?.getHTML().split("\n").map((line, index) => {
                         return {
                             index,
