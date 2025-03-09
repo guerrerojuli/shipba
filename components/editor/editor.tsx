@@ -22,6 +22,7 @@ import { DocumentSelect } from "@/lib/db/types"
 import { Skeleton } from "../ui/skeleton"
 import { deleteDocument, renameDocument, saveDocument } from "@/actions/documentActions"
 import { styleMarkdownHTML } from "@/lib/utils"
+import { useSocket } from "@/hooks/use-socket"
 
 interface EditorProps {
   loading: boolean
@@ -64,6 +65,7 @@ export function Editor({
   const [needsSave, setNeedsSave] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null)
   const editNameRef = useRef<HTMLInputElement>(null)
+  const { content, name, change, rename } = useSocket(documentData?.id!, documentData?.content || [], documentData?.name || "Untitled Document");
   const editor = useEditor(
     {
       immediatelyRender: true,
@@ -104,7 +106,7 @@ export function Editor({
           ]
           : []),
       ],
-      content: loading ? "Loading..." : documentData?.content.map((data) => data.line).join("<br />") || "",
+      content: loading ? "Loading..." : content.map((data) => data.line).join("<br />"),
       editable: !loading,
       onSelectionUpdate: ({ editor }) => {
         const { from, to } = editor.state.selection
