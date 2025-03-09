@@ -1,6 +1,6 @@
 "use client"
 
-import { startTransition, useCallback, useEffect, useState, useTransition } from "react"
+import { useCallback, useEffect, useState, useTransition } from "react"
 import { Plus, File, Upload, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,6 +9,7 @@ import { Sidebar, SidebarContent, SidebarHeader, SidebarProvider } from "@/compo
 import { createDocument, getDocumentList } from "@/actions/documentActions"
 import { DocumentInfo, DocumentInsert } from "@/lib/db/types"
 import { Skeleton } from "../ui/skeleton"
+import { useRouter } from "next/navigation"
 
 interface DocumentSidebarProps {
   activeDocument: DocumentInfo | null
@@ -21,6 +22,7 @@ export function DocumentSidebar({ activeDocument, onDocumentSelect }: DocumentSi
   const [loadingCreate, startLoadingCreate] = useTransition();
   const [documents, setDocuments] = useState<DocumentInfo[]>([])
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
+  const router = useRouter();
 
   useEffect(() => {
     const fetchDocuments = async () => {
@@ -33,6 +35,10 @@ export function DocumentSidebar({ activeDocument, onDocumentSelect }: DocumentSi
   }, []);
 
   const handleCreateDocument = useCallback(async () => {
+    if(documents.length >= 1 && localStorage.getItem("userSubscription") !== "pro") {
+      router.push("/pricing")
+      return;
+    }
     startLoadingCreate(async () => {
       if (!user) return;
       const newDocument: DocumentInsert = {
@@ -48,6 +54,10 @@ export function DocumentSidebar({ activeDocument, onDocumentSelect }: DocumentSi
   }, [user, documents])
 
   const handleUploadDocument = (file: File) => {
+    if(documents.length >= 1 && localStorage.getItem("userSubscription") !== "pro") {
+      router.push("/pricing")
+      return;
+    }
     const reader = new FileReader()
     reader.onload = (e) => {
       const content = e.target?.result as string

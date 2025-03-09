@@ -51,10 +51,7 @@ export default function SuccessPage() {
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">
           <Button className="w-full" asChild>
-            <Link href="/dashboard">Go to Dashboard</Link>
-          </Button>
-          <Button variant="outline" className="w-full" asChild>
-            <Link href="/account">Manage Subscription</Link>
+            <Link href="/">Go to Dashboard</Link>
           </Button>
         </CardFooter>
       </Card>
