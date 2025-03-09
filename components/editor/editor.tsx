@@ -49,7 +49,6 @@ export function Editor({
   const [newName, setNewName] = useState(documentData?.name || "Untitled Document");
   const [loadingSave, startLoadingSave] = useTransition();
   const [loadingDelete, startLoadingDelete] = useTransition();
-  const [loadingDownload, startLoadingDownload] = useTransition();
   const [needsSave, setNeedsSave] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null)
   const editNameRef = useRef<HTMLInputElement>(null)
