@@ -175,7 +175,7 @@ export function AssistantSidebar({
             })}
 
             {status === "streaming" && (
-              <Loading bgColor="bg-muted-foreground" />
+              <Loading bgColor="bg-muted" />
             )}
 
             {status === "submitted" && (
