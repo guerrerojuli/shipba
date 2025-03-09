@@ -7,8 +7,8 @@ import type { Metadata } from "next"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "AI-Powered Document Editor",
-  description: "Collaborative document editor with Gemini AI integration",
+  title: "DocsAI",
+  description: "DocsAI is an AI-powered document editor that allows you to edit documents with the help of an AI assistant.",
 }
 
 export default function RootLayout({
