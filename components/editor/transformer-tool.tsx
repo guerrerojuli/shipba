@@ -114,7 +114,7 @@ export function TransformerTool({
         >
           <div className="text-sm font-medium">Edit Text</div>
           <div className="space-y-3">
-            <Select 
+            <Select
               value={selectedPreset}
               onValueChange={(value) => {
                 setSelectedPreset(value)

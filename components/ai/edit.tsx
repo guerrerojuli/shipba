@@ -1,11 +1,12 @@
 import { saveDocument } from "@/actions/documentActions";
 import type { DocumentSelect } from "@/lib/db/types";
 import type { Editor as EditorType } from "@tiptap/react"
+import { marked } from "marked";
 import { useState } from "react";
 
 export function Edit(
-    { newDocument, activeDocument, setActiveDocument, editor }: { 
-        newDocument: string, 
+    { newDocument, activeDocument, setActiveDocument, editor }: {
+        newDocument: string,
         activeDocument: DocumentSelect,
         setActiveDocument: (document: DocumentSelect) => void,
         editor: EditorType | null
@@ -18,36 +19,35 @@ export function Edit(
             <div className="max-h-[240px] overflow-y-auto mb-3">
                 <div dangerouslySetInnerHTML={{ __html: newDocument }} />
             </div>
-            <button 
+            <button
                 onClick={async () => {
                     if (!editor) return;
                     editor.commands.setContent(newDocument);
                     await saveDocument(activeDocument.id, editor?.getHTML().split("\n").map((line, index) => {
                         return {
-                          index,
-                          line: line || ""
+                            index,
+                            line: line || ""
                         }
-                      }) || []);
+                    }) || []);
                     setIsApplied(true);
                 }}
                 disabled={isApplied}
-                className={`flex items-center gap-2 px-3 py-1.5 ${
-                    isApplied 
-                        ? 'bg-green-700 cursor-not-allowed' 
+                className={`flex items-center gap-2 px-3 py-1.5 ${isApplied
+                        ? 'bg-green-700 cursor-not-allowed'
                         : 'bg-green-500 hover:bg-green-600'
-                } text-white rounded-md transition-colors`}
+                    } text-white rounded-md transition-colors`}
             >
-                <svg 
-                    className="w-4 h-4" 
-                    fill="none" 
-                    stroke="currentColor" 
+                <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
                     viewBox="0 0 24 24"
                 >
-                    <path 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round" 
-                        strokeWidth={2} 
-                        d="M5 13l4 4L19 7" 
+                    <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
                     />
                 </svg>
                 {isApplied ? 'Applied' : 'Apply Changes'}
