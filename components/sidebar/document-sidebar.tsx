@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { useUser } from "@clerk/nextjs"
 import { Sidebar, SidebarContent, SidebarHeader, SidebarProvider } from "@/components/ui/sidebar"
 import { createDocument, uploadDocument } from "@/actions/documentActions"
-import { DocumentInfo, DocumentInsert } from "@/lib/db/types"
+import { DocumentInfo, DocumentInsert, DocumentSelect } from "@/lib/db/types"
 import { Skeleton } from "../ui/skeleton"
 import { useRouter } from "next/navigation"
 
@@ -17,9 +17,19 @@ interface DocumentSidebarProps {
   loadingList: boolean
   onDocumentSelect: (document: DocumentInfo) => void
   setDocuments: (documents: DocumentInfo[]) => void
+  onAddToContext: (document: DocumentInfo) => void
+  documentContext: DocumentSelect[]
 }
 
-export function DocumentSidebar({ activeDocument, documents, loadingList, onDocumentSelect, setDocuments }: DocumentSidebarProps) {
+export function DocumentSidebar({ 
+  activeDocument, 
+  documents, 
+  loadingList, 
+  onDocumentSelect, 
+  setDocuments,
+  onAddToContext,
+  documentContext
+}: DocumentSidebarProps) {
   const { user } = useUser();
   
   const [loadingCreate, startLoadingCreate] = useTransition();
@@ -91,7 +101,6 @@ export function DocumentSidebar({ activeDocument, documents, loadingList, onDocu
                   <MoreVertical className="h-4 w-4" onClick={(e) => {
                     e.stopPropagation();
                     // Open dropdown menu
-
                   }} />
                 </div>
               </Button>

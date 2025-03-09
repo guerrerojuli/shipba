@@ -37,6 +37,15 @@ function EditorContent() {
     })
   }, [])
 
+  const handleAddToContext = useCallback(async (document: DocumentInfo) => {
+    if (!documentContext.find(doc => doc.id === document.id)) {
+      startTransition(async () => {
+        const documentData = await getDocument(document.id);
+        setDocumentContext([...documentContext, documentData]);
+      });
+    }
+  }, [documentContext]);
+
   const handleRemoveDocumentContext = (documentId: string) => {
     setDocumentContext(documentContext.filter((doc) => doc.id !== documentId))
   }
@@ -45,7 +54,15 @@ function EditorContent() {
     <div className="h-screen w-full overflow-hidden">
       <div className="flex h-full">
         <div>
-          <DocumentSidebar loadingList={loadingList} documents={documents} setDocuments={setDocuments} activeDocument={activeDocument} onDocumentSelect={handleDocumentSelect} />
+          <DocumentSidebar 
+            loadingList={loadingList} 
+            documents={documents} 
+            setDocuments={setDocuments} 
+            activeDocument={activeDocument} 
+            onDocumentSelect={handleDocumentSelect}
+            onAddToContext={handleAddToContext}
+            documentContext={documentContext}
+          />
         </div>
         
         
@@ -83,6 +100,8 @@ function EditorContent() {
               activeDocument={activeDocument}
               setActiveDocument={setActiveDocument}
               onRemoveSelectedText={() => setSelectedText("")}
+              documents={documents}
+              onAddToContext={handleAddToContext}
             />
           </ResizablePanel>
         </ResizablePanelGroup>

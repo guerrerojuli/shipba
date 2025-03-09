@@ -52,20 +52,21 @@ export async function POST(req: Request) {
   const systemMessage = `
   You are an AI assistant specialized in document editing, writing, translation, and analysis. You have access to a suggestEdit tool that allows you to suggest edits to the entire document content.
 
+  The context provided will include documents with the following structure:
+  {
+    id: string, 
+    name: string, 
+    content: [{index: number, line: string}], 
+    userId: string,
+    createdAt: Date,
+    createdBy: string
+  }
+
   When suggesting edits:
-<<<<<<< HEAD
-  1. Use the suggestEdit tool to provide a complete new version of the document content.
-  2. The new document content should be provided as a single string with line breaks preserved.
+  1. Use the suggestEdit tool to provide a new version of the document content.
+  2. The new document content should be provided as an array of objects with the structure {index: number, line: string}.
   3. Clearly explain your changes after executing suggestEdit.
 
-=======
-  1. Use the suggestEdit tool once per request, grouping all line changes into one single execution.
-  2. Each suggestion within the execution must specify clearly:
-     - index: the exact line number to change
-     - line: the new line contet
-  3. Clearly explain each edit after executing suggestEdit, no more than 2 sentences and 18 words.
-  
->>>>>>> ee5ad78 (Chat functionality broken)
   GUIDELINES:
   - You can translate text as part of editing tasks when explicitly requested by the user.
   - Prioritize edits that improve clarity, readability, style, and correctness.
@@ -76,6 +77,7 @@ export async function POST(req: Request) {
   
   ALWAYS USE suggestEdit FOR TEXT CHANGES.`;
 
+  console.log("System message:", systemMessage)
 
   // Generate a response
   const response = streamText({

@@ -1,13 +1,14 @@
 "use client"
 
-import { KeyboardEvent, useRef } from "react"
-import { X, Plus, CornerDownLeft } from "lucide-react"
+import { KeyboardEvent, useRef, useState } from "react"
+import { X, Plus, CornerDownLeft, File } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useChat } from "@ai-sdk/react"
-import type { DocumentSelect } from "@/lib/db/types"
+import type { DocumentSelect, DocumentInfo } from "@/lib/db/types"
 import { Edit } from "../ai/edit"
 import type { Editor as EditorType } from "@tiptap/react"
+import { Badge } from "@/components/ui/badge"
 
 interface AssistantSidebarProps {
   editor: EditorType | null
@@ -17,6 +18,8 @@ interface AssistantSidebarProps {
   activeDocument: DocumentSelect | null
   setActiveDocument: (document: DocumentSelect) => void
   onRemoveSelectedText: () => void
+  documents: DocumentInfo[]
+  onAddToContext: (document: DocumentInfo) => Promise<void>
 }
 
 export function AssistantSidebar({
@@ -27,7 +30,10 @@ export function AssistantSidebar({
   activeDocument,
   setActiveDocument,
   onRemoveSelectedText,
+  documents,
+  onAddToContext
 }: AssistantSidebarProps) {
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const { messages, input, handleInputChange, handleSubmit, status } = useChat({
     body: {
@@ -67,7 +73,6 @@ export function AssistantSidebar({
         <div className="flex flex-wrap gap-2">
           {documentContext.length > 0 ? (
             documentContext.map((doc) => (
-              /*
               <Badge key={doc.id} variant="secondary" className="flex items-center gap-1">
                 {doc.name}
                 <Button
@@ -79,17 +84,50 @@ export function AssistantSidebar({
                   <X className="h-3 w-3" />
                 </Button>
               </Badge>
-              */
-              <div>a</div>
             ))
           ) : (
             <div className="text-sm text-muted-foreground">No context documents added</div>
           )}
-          <Button variant="outline" size="sm" className="h-6">
+          <Button variant="outline" size="sm" className="h-6" onClick={() => setIsAddModalOpen(true)}>
             <Plus className="mr-1 h-3 w-3" /> Add
           </Button>
         </div>
       </div>
+
+      {/* Modal para agregar documentos al contexto */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="w-full max-w-md rounded-lg bg-background p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Add Documents to Context</h3>
+              <Button variant="ghost" size="icon" onClick={() => setIsAddModalOpen(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="max-h-[60vh] overflow-y-auto">
+              <div className="space-y-2">
+                {documents.map((document) => (
+                  <Button
+                    key={document.id}
+                    variant="ghost"
+                    className="w-full justify-start"
+                    onClick={() => {
+                      onAddToContext(document);
+                      setIsAddModalOpen(false);
+                    }}
+                    disabled={documentContext.some(doc => doc.id === document.id)}
+                  >
+                    <div className="flex items-center">
+                      <File className="mr-2 h-4 w-4" />
+                      <span className="truncate">{document.name}</span>
+                    </div>
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="flex-1 overflow-hidden relative">
         <div className="absolute inset-0 overflow-y-auto p-4">
