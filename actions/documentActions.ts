@@ -47,8 +47,9 @@ export async function createDocument(document: DocumentInsert) {
 }
 
 export async function saveDocument(documentId: string, content: DocumentContent[]) {
-    await updateDocument(documentId, { content });
+    const updatedDocument = await updateDocument(documentId, { content });
     revalidatePath("/");
+    return updatedDocument;
 }
 
 export async function renameDocument(documentId: string, name: string) {

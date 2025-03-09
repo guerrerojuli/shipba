@@ -144,12 +144,13 @@ export function Editor({
   const handleSave = useCallback(() => {
     startLoadingSave(async () => {
       if (!documentData) return;
-      await saveDocument(documentData.id, editor?.getHTML().split("\n").map((line, index) => {
+      const document = await saveDocument(documentData.id, editor?.getHTML().split("\n").map((line, index) => {
         return {
           index,
           line: line || ""
         }
       }) || []);
+      onDocumentUpdate(document);
       setNeedsSave(false);
     })
   }, [documentData, editor]);
