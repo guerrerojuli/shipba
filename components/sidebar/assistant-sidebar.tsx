@@ -114,10 +114,18 @@ export function AssistantSidebar({
 
                 {message.content && (
                   <div
+<<<<<<< HEAD
                     className={`rounded-lg p-3 ${message.role === "user"
                         ? "bg-primary text-primary-foreground max-w-[80%]"
                         : "text-black-600 max-w-[100%]"
                       }`}
+=======
+                    className={`rounded-lg p-3 ${
+                      message.role === "user" 
+                        ? "bg-primary text-primary-foreground max-w-[80%]" 
+                        : "text-black-600 max-w-[100%]"
+                    }`}
+>>>>>>> ee5ad78 (Chat functionality broken)
                   >
                     {message.content}
                   </div>

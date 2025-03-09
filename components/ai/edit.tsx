@@ -20,8 +20,62 @@ export function Edit(
             <button 
                 onClick={() => {
                     if (!editor) return;
+<<<<<<< HEAD
                     editor.commands.setContent(newDocument);
                     setIsApplied(true);
+=======
+                    
+                    // Ordenar las sugerencias por índice en orden ascendente
+                    const sortedSuggestions = [...suggestion].sort((a, b) => a.index - b.index);
+                    
+                    // Aplicar los cambios al editor
+                    sortedSuggestions.forEach(item => {
+                        const doc = editor.state.doc;
+                        let lineStart = 0;
+                        let lineEnd = 0;
+                        let currentLine = 0;
+                        
+                        doc.descendants((node, pos) => {
+                            if (currentLine === item.index) {
+                                lineStart = pos;
+                                lineEnd = pos + node.nodeSize;
+                                return false;
+                            }
+                            currentLine++;
+                            return true;
+                        });
+
+                        if (lineStart !== lineEnd) {
+                            editor
+                                .chain()
+                                .focus()
+                                .deleteRange({ from: lineStart, to: lineEnd })
+                                .insertContentAt(lineStart, item.line)
+                                .run();
+                        } else {
+                            editor
+                                .chain()
+                                .focus()
+                                .insertContentAt(editor.state.doc.content.size, "\n" + item.line)
+                                .run();
+                        }
+
+                        console.log("EDITOR STATE:", editor.state.doc.content);
+                    });
+
+                    // Actualizar el estado del documento
+                    const updatedContent = editor.getJSON().content
+                        ?.filter(data => data.content)
+                        .map((data, index) => ({
+                            index,
+                            line: data.content?.[0]?.text || ""
+                        })) || [];
+
+                    setActiveDocument({
+                        ...activeDocument,
+                        content: updatedContent
+                    });
+>>>>>>> ee5ad78 (Chat functionality broken)
                 }}
                 disabled={isApplied}
                 className={`flex items-center gap-2 px-3 py-1.5 ${

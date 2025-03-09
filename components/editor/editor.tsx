@@ -259,7 +259,18 @@ export function Editor({
             setText={(text: string) => {
               if (!editor) return
               const { from, to } = editor.state.selection
-              editor.chain().focus().deleteRange({ from, to }).insertContentAt(from, text).run()
+              const lines = text.split("\n")
+              
+              editor.chain().focus().deleteRange({ from, to })
+              
+              // Insertar cada línea en la posición correcta
+              lines.forEach((line, i) => {
+                const pos = editor.state.selection.from
+                if (i > 0) {
+                  editor.chain().focus().insertContentAt(pos, "\n").run()
+                }
+                editor.chain().focus().insertContentAt(pos, line).run()
+              })
             }}
             onAddToChat={handleAddToChat}
             onClose={() => {

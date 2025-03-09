@@ -28,7 +28,7 @@ export function DocumentSidebar({ activeDocument, documents, loadingList, onDocu
   const router = useRouter();
 
   const handleCreateDocument = useCallback(async () => {
-    if(documents.length >= 1 && localStorage.getItem("userSubscription") !== "pro") {
+    if(documents.length >= 2 && localStorage.getItem("userSubscription") !== "pro") {
       router.push("/pricing")
       return;
     }
@@ -38,7 +38,7 @@ export function DocumentSidebar({ activeDocument, documents, loadingList, onDocu
         id: crypto.randomUUID(),
         name: "Untitled Document",
         createdBy: user.emailAddresses[0].emailAddress,
-        content: [{index: 0, line: ""}],
+        content: [],
         userId: user?.id,
       }
       const document = await createDocument(newDocument);
