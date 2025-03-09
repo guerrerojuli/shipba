@@ -80,7 +80,7 @@ export function AssistantSidebar({
                 </Button>
               </Badge>
               */
-             <div>a</div>
+              <div>a</div>
             ))
           ) : (
             <div className="text-sm text-muted-foreground">No context documents added</div>
@@ -105,14 +105,18 @@ export function AssistantSidebar({
 
                   console.log(toolInvocation)
 
-                  if (toolName === "suggestEdit" && state === "result") {
-                    return <Edit key={toolCallId} suggestion={args.suggestion} activeDocument={activeDocument || {id: "", name: "", content: [], createdAt: new Date(), userId: "", createdBy: ""}} setActiveDocument={setActiveDocument} editor={editor}/>
+                  if (toolName === "suggestEdit") {
+                    if (state === "result") {
+                      return <Edit key={toolCallId} newDocument={args.newDocument} activeDocument={activeDocument || { id: "", name: "", content: [], createdAt: new Date(), userId: "", createdBy: "" }} setActiveDocument={setActiveDocument} editor={editor} />
+                    }
                   }
                 })}
 
                 {message.content && (
                   <div
-                    className={`max-w-[80%] rounded-lg p-3 ${message.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"
+                    className={`rounded-lg p-3 ${message.role === "user"
+                        ? "bg-primary text-primary-foreground max-w-[80%]"
+                        : "text-black-600 max-w-[100%]"
                       }`}
                   >
                     {message.content}

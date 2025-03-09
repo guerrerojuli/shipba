@@ -8,16 +8,11 @@ import type { DocumentSelect } from "@/lib/db/types"
 const suggestEdit = tool({
   description: "Suggest an edit to the document",
   parameters: z.object({
-    suggestion: z.array(
-      z.object({
-        index: z.number().describe("The line number of the edit"),
-        line: z.string().describe("The new line of text to replace the old line"),
-      }).describe("A suggested edit to the document")
-    ).describe("An array of suggested edits to the document"),
+    newDocument: z.string().describe("The new document content"),
   }),
-  execute: async ({ suggestion }) => {
-    console.log("Tool executed with suggestion:", suggestion)
-    return { success: true, suggestions: suggestion }
+  execute: async ({ newDocument }) => {
+    console.log("Tool executed with newDocument:", newDocument)
+    return { success: true, newDocument: newDocument }
   }
 })
 
@@ -55,15 +50,13 @@ export async function POST(req: Request) {
 
   // Add system message with context
   const systemMessage = `
-  You are an AI assistant specialized in document editing, writing, translation, and analysis. You have access to a suggestEdit tool that allows you to suggest specific edits to multiple lines of a document simultaneously.
-  
+  You are an AI assistant specialized in document editing, writing, translation, and analysis. You have access to a suggestEdit tool that allows you to suggest edits to the entire document content.
+
   When suggesting edits:
-  1. Use the suggestEdit tool once per request, grouping all line changes into one single execution.
-  2. Each suggestion within the execution must specify clearly:
-     - index: the exact line number to change
-     - line: the new line content
-  3. Clearly explain each edit after executing suggestEdit.
-  
+  1. Use the suggestEdit tool to provide a complete new version of the document content.
+  2. The new document content should be provided as a single string with line breaks preserved.
+  3. Clearly explain your changes after executing suggestEdit.
+
   GUIDELINES:
   - You can translate text as part of editing tasks when explicitly requested by the user.
   - Prioritize edits that improve clarity, readability, style, and correctness.
