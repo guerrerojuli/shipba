@@ -107,25 +107,23 @@ export function AssistantSidebar({
 
                   if (toolName === "suggestEdit") {
                     if (state === "result") {
-                      return <Edit key={toolCallId} newDocument={args.newDocument} activeDocument={activeDocument || { id: "", name: "", content: [], createdAt: new Date(), userId: "", createdBy: "" }} setActiveDocument={setActiveDocument} editor={editor} />
+                      return <Edit 
+                        key={toolCallId} 
+                        suggestion={args.newDocument} 
+                        activeDocument={activeDocument || { id: "", name: "", content: [], createdAt: new Date(), userId: "", createdBy: "" }} 
+                        setActiveDocument={setActiveDocument} 
+                        editor={editor}
+                      />
                     }
                   }
                 })}
 
                 {message.content && (
                   <div
-<<<<<<< HEAD
                     className={`rounded-lg p-3 ${message.role === "user"
                         ? "bg-primary text-primary-foreground max-w-[80%]"
                         : "text-black-600 max-w-[100%]"
                       }`}
-=======
-                    className={`rounded-lg p-3 ${
-                      message.role === "user" 
-                        ? "bg-primary text-primary-foreground max-w-[80%]" 
-                        : "text-black-600 max-w-[100%]"
-                    }`}
->>>>>>> ee5ad78 (Chat functionality broken)
                   >
                     {message.content}
                   </div>
