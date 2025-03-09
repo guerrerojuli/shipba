@@ -1,0 +1,5 @@
+custom:
+    bundle:
+        includeModules: true
+        externals:
+            - pdf-parse

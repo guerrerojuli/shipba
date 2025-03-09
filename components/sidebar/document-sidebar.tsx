@@ -1,12 +1,12 @@
 "use client"
 
-import { startTransition, useCallback, useEffect, useState, useTransition } from "react"
+import { FormEvent, startTransition, useCallback, useEffect, useState, useTransition } from "react"
 import { Plus, File, Upload, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useUser } from "@clerk/nextjs"
 import { Sidebar, SidebarContent, SidebarHeader, SidebarProvider } from "@/components/ui/sidebar"
-import { createDocument, getDocumentList } from "@/actions/documentActions"
+import { createDocument, getDocumentList, uploadDocument } from "@/actions/documentActions"
 import { DocumentInfo, DocumentInsert } from "@/lib/db/types"
 import { Skeleton } from "../ui/skeleton"
 
@@ -19,6 +19,7 @@ export function DocumentSidebar({ activeDocument, onDocumentSelect }: DocumentSi
   const { user } = useUser();
   const [loadingList, startLoadingList] = useTransition();
   const [loadingCreate, startLoadingCreate] = useTransition();
+  const [loadingUpload, startLoadingUpload] = useTransition();
   const [documents, setDocuments] = useState<DocumentInfo[]>([])
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false)
 
@@ -47,15 +48,15 @@ export function DocumentSidebar({ activeDocument, onDocumentSelect }: DocumentSi
     })
   }, [user, documents])
 
-  const handleUploadDocument = (file: File) => {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      const content = e.target?.result as string
-      console.log(content);
-    }
-    reader.readAsText(file)
-    setIsUploadModalOpen(false)
-  }
+  const handleUploadDocument = useCallback(async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    startLoadingUpload(async () => {
+      const formData = new FormData(e.target as HTMLFormElement);
+      const document = await uploadDocument(formData);
+      setIsUploadModalOpen(false);
+      setDocuments([...documents, document]);
+    })
+  }, [user])
 
   return (
     <SidebarProvider>
@@ -95,23 +96,22 @@ export function DocumentSidebar({ activeDocument, onDocumentSelect }: DocumentSi
       {isUploadModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="w-full max-w-md rounded-lg bg-background p-6">
-            <h3 className="mb-4 text-lg font-semibold">Upload Document</h3>
-            <Input
-              type="file"
-              accept=".txt,.md,.docx,.pdf"
-              onChange={(e) => {
-                const file = e.target.files?.[0]
-                if (file) {
-                  handleUploadDocument(file)
-                }
-              }}
-            />
-            <div className="mt-4 flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setIsUploadModalOpen(false)}>
-                Cancel
-              </Button>
-              <Button>Upload</Button>
-            </div>
+            <form onSubmit={handleUploadDocument}>
+              <h3 className="mb-4 text-lg font-semibold">Upload Document</h3>
+              <Input
+                name="file"
+                type="file"
+                accept=".pdf"
+              />
+              <div className="mt-4 flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setIsUploadModalOpen(false)}>
+                  Cancel
+                </Button>
+                <Button disabled={loadingUpload}>
+                  {loadingUpload ? <Loader2 className="h-4 w-4 animate-spin" /> : "Upload"}
+                </Button>
+              </div>
+            </form>
           </div>
         </div>
       )}

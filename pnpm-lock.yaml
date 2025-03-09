@@ -101,6 +101,9 @@ importers:
       next:
         specifier: 14.1.0
         version: 14.1.0(@opentelemetry/api@1.9.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      pdf-parse:
+        specifier: ^1.1.1
+        version: 1.1.1
       postgres:
         specifier: ^3.4.5
         version: 3.4.5
@@ -147,6 +150,9 @@ importers:
       '@types/node':
         specifier: ^20
         version: 20.17.24
+      '@types/pdf-parse':
+        specifier: ^1.1.4
+        version: 1.1.4
       '@types/react':
         specifier: ^18.3.18
         version: 18.3.18
@@ -1822,6 +1828,9 @@ packages:
   '@types/node@20.17.24':
     resolution: {integrity: sha512-d7fGCyB96w9BnWQrOsJtpyiSaBcAYYr75bnK6ZRjDbql2cGLj/3GsL5OYmLPNq76l7Gf2q4Rv9J2o6h5CrD9sA==}
 
+  '@types/pdf-parse@1.1.4':
+    resolution: {integrity: sha512-+gbBHbNCVGGYw1S9lAIIvrHW47UYOhMIFUsJcMkMrzy1Jf0vulBN3XQIjPgnoOXveMuHnF3b57fXROnY/Or7eg==}
+
   '@types/prop-types@15.7.14':
     resolution: {integrity: sha512-gNMvNH49DJ7OJYv+KAKn0Xp45p8PLl6zo2YnvDIbTd4J6MER2BmWN49TG7n9LvkyihINxeKW8+3bfS2yDC9dzQ==}
 
@@ -3207,6 +3216,9 @@ packages:
   no-case@3.0.4:
     resolution: {integrity: sha512-fgAN3jGAh+RoxUGZHTSOLJIqUc2wmoBwGR4tbpNAKmmovFoWq0OdRkb0VkldReO2a2iBT/OEulG9XSUc10r3zg==}
 
+  node-ensure@0.0.0:
+    resolution: {integrity: sha512-DRI60hzo2oKN1ma0ckc6nQWlHU69RH6xN0sjQTjMpChPfTYvKZdcQFfdYK2RWbJcKyUizSIy/l8OTGxMAM1QDw==}
+
   node-fetch-native@1.0.1:
     resolution: {integrity: sha512-VzW+TAk2wE4X9maiKMlT+GsPU4OMmR1U9CrHSmd3DFLn2IcZ9VJ6M6BBugGfYUnPCLSYxXdZy17M0BEJyhUTwg==}
 
@@ -3312,6 +3324,10 @@ packages:
   path-type@4.0.0:
     resolution: {integrity: sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==}
     engines: {node: '>=8'}
+
+  pdf-parse@1.1.1:
+    resolution: {integrity: sha512-v6ZJ/efsBpGrGGknjtq9J/oC8tZWq0KWL5vQrk2GlzLEQPUDB1ex+13Rmidl1neNN358Jn9EHZw5y07FFtaC7A==}
+    engines: {node: '>=6.8.1'}
 
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
@@ -5587,6 +5603,8 @@ snapshots:
     dependencies:
       undici-types: 6.19.8
 
+  '@types/pdf-parse@1.1.4': {}
+
   '@types/prop-types@15.7.14': {}
 
   '@types/qs@6.9.18': {}
@@ -7154,6 +7172,8 @@ snapshots:
       lower-case: 2.0.2
       tslib: 2.8.1
 
+  node-ensure@0.0.0: {}
+
   node-fetch-native@1.0.1: {}
 
   node-gyp-build@4.1.1:
@@ -7257,6 +7277,13 @@ snapshots:
       minipass: 7.1.2
 
   path-type@4.0.0: {}
+
+  pdf-parse@1.1.1:
+    dependencies:
+      debug: 3.2.7
+      node-ensure: 0.0.0
+    transitivePeerDependencies:
+      - supports-color
 
   picocolors@1.1.1: {}
 

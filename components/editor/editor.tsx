@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useTransition, useCallback } from "react"
 import { useEditor, EditorContent } from "@tiptap/react"
 import StarterKit from "@tiptap/starter-kit"
 import Placeholder from "@tiptap/extension-placeholder"
@@ -12,12 +12,13 @@ import { EditorToolbar } from "./editor-toolbar"
 import { TransformerTool } from "./transformer-tool"
 import { useUser } from "@clerk/nextjs"
 import { Button } from "@/components/ui/button"
-import { MessageSquare, Plus } from "lucide-react"
+import { AlertCircle, Check, CheckCircle, Loader2, MessageSquare, Plus } from "lucide-react"
 import Heading from '@tiptap/extension-heading'
 import Code from '@tiptap/extension-code'
 
 import { DocumentSelect } from "@/lib/db/types"
 import { Skeleton } from "../ui/skeleton"
+import { saveDocument } from "@/actions/documentActions"
 
 interface EditorProps {
   loading: boolean
@@ -32,6 +33,8 @@ export function Editor({ loading, document: documentData, onAddToChat }: EditorP
   const [selectedText, setSelectedText] = useState("")
   const [transformerPosition, setTransformerPosition] = useState<{ x: number; y: number } | null>(null)
   const [showTransformer, setShowTransformer] = useState(false)
+  const [loadingSave, startLoadingSave] = useTransition();
+  const [needsSave, setNeedsSave] = useState(false);
   const editorRef = useRef<HTMLDivElement>(null)
   const editor = useEditor(
     {
@@ -109,10 +112,33 @@ export function Editor({ loading, document: documentData, onAddToChat }: EditorP
           setShowTransformer(false)
         }
       },
+      onUpdate: (props) => {
+        setNeedsSave(true);
+        handleSaveDebounced();
+      },
     },
     [editorReady, documentData, loading]
   )
 
+  const handleSave = useCallback(() => {
+    startLoadingSave(async () => {
+      if (!documentData) return;
+      await saveDocument(documentData.id, editor?.getText() || "");
+      setNeedsSave(false);
+    })
+  }, [documentData, editor]);
+
+  // Handle save debounced
+
+  const debounce = (func: () => void, delay: number) => {
+    let timeout: NodeJS.Timeout;
+    return () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(), delay);
+    };
+  }
+
+  const handleSaveDebounced = useCallback(debounce(handleSave, 1000), [handleSave]);
 
   if (!providerRef.current && documentData) {
     try {
@@ -147,9 +173,16 @@ export function Editor({ loading, document: documentData, onAddToChat }: EditorP
       <div className="flex items-center justify-between border-b p-2">
         <div className="flex items-center gap-2">
           {loading ? 
-            <Skeleton className="h-4 w-10" /> : 
-            <h1 className="text-xl font-semibold">{documentData?.name || "Untitled Document"}</h1>
+            <Skeleton className="h-8 w-32" /> : 
+            <h1 className="ml-2 text-xl font-semibold">{documentData?.name || "Untitled Document"}</h1>
           }
+          <p className="flex items-center gap-1">
+            {loadingSave ? 
+              <Loader2 className="h-4 w-4 animate-spin" /> : 
+              needsSave ? <AlertCircle className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />
+            }
+            {loadingSave ? "Saving..." : needsSave ? "Unsaved" : "Saved"}
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm">
