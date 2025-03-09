@@ -25,7 +25,7 @@ export default function PricingPage() {
           </TabsList>
           <TabsContent value="monthly" className="mt-8">
             <PricingCard
-              price="$10"
+              price="$12"
               description="Full access to all MarkdownPro features"
               features={[
                 "Unlimited documents",
